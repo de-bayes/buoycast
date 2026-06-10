@@ -8,14 +8,23 @@ ML forecasts of nearshore water temperature (and, honestly, not wave height) fro
 2. `python3 train.py` builds lag/delta/rolling-wind/seasonal features and trains a `HistGradientBoostingRegressor` per target and horizon (+3, +6, +12, +24 h), holding out the most recent three in-season weeks. Every model is scored against persistence (forecast = current value), the baseline any honest nowcast must beat.
 3. `python3 forecast.py` pulls the latest observations, runs the models, prints a readable forecast with holdout error bars, and writes `forecast.json`.
 
-## Current skill (holdout MAE vs persistence)
+4. `python3 compare.py` is the model bake-off: ridge, lasso, kNN, random forest, extra trees, and gradient boosting, ranked by 3-fold walk-forward CV inside the training years, then scored once on the untouched test weeks. The CV winner per horizon becomes the production model.
 
-| Target | +3h | +6h | +12h | +24h |
+## Bake-off results (water temp, test MAE in deg C)
+
+| Model | +3h | +6h | +12h | +24h |
 | --- | --- | --- | --- | --- |
-| Water temp (C) | 0.19 vs 0.23 | 0.32 vs 0.41 | 0.48 vs 0.60 | 0.57 vs 0.69 |
-| Wave height (m) | 0.10 vs 0.07 | 0.15 vs 0.11 | 0.21 vs 0.16 | 0.29 vs 0.24 |
+| persistence | 0.233 | 0.405 | 0.598 | 0.685 |
+| ridge | 0.192 | 0.319 | 0.446 | 0.601 |
+| **lasso (chosen)** | 0.190 | 0.312 | 0.446 | 0.599 |
+| kNN | 0.695 | 0.789 | 0.968 | 1.117 |
+| random forest | 0.213 | 0.387 | 0.624 | 0.619 |
+| extra trees | 0.194 | 0.333 | 0.533 | 0.690 |
+| hist gradient boosting | 0.187 | 0.318 | 0.484 | 0.573 |
 
-Water temperature beats persistence at every horizon (the rolling wind-vector features carry the upwelling signal: sustained alongshore wind pushes warm surface water offshore and cold water up). Wave height loses to persistence at every horizon, which is physically expected: waves on a 12-mile fetch are driven by wind that has not happened yet, and nothing in the buoy's own past predicts it. The forecast output flags those rows. The fix, if wanted, is feeding Open-Meteo forecast winds in as future covariates.
+![model comparison](reports/model_comparison.png)
+
+Lasso wins by CV at every horizon and cuts persistence error by 18 to 25%. Regularized linear models beating trees is the expected result for a smooth physical series with informative lags; the rolling wind-vector features carry the upwelling signal (sustained alongshore wind pushes warm surface water offshore and cold water up). Wave height still loses to persistence at every horizon, which is physically expected: waves on this fetch are made by wind that has not happened yet. The forecast output flags those rows; the fix would be Open-Meteo forecast winds as future covariates.
 
 ## Notes
 
