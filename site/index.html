@@ -48,6 +48,12 @@
       <p class="card__cap">Left: median forecast error against "the water stays exactly as it is now." Right: how often the 90% (cyan) and 50% (yellow) bands actually contained the outcome on test; dashed lines are perfect calibration. Bands a touch narrow at 2-3 day leads and the 50% band degrades past day 5: known, quantified, shown.</p>
     </section>
 
+    <section class="card" id="backtest-card" hidden>
+      <p class="card__kicker">FIVE-SEASON ROLLING BACKTEST</p>
+      <img src="/reports/backtest.png" alt="Backtest MAE by lead time across five seasons">
+      <p class="card__cap" id="backtest-cap"></p>
+    </section>
+
     <section class="card">
       <p class="card__kicker">HINDCAST &middot; +24H FORECASTS REPLAYED OVER THE TEST WEEKS</p>
       <canvas id="hindcast" height="240"></canvas>

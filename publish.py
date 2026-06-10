@@ -83,6 +83,10 @@ for date, pts in sorted(byday.items()):
         "p95": round(float(np.mean([p["p95"] for p in pts])), 1),
     })
 
+hist_series = hourly_buoy["WTMP"].ffill().tail(49)
+history = [{"h": i - (len(hist_series) - 1), "t": ts.isoformat(), "f": round(F(v), 2)}
+           for i, (ts, v) in enumerate(hist_series.items()) if pd.notna(v)]
+
 last = hourly_buoy.ffill().iloc[-1]
 out = {
     "generated_utc": pd.Timestamp.now("UTC").isoformat(),
@@ -93,11 +97,23 @@ out = {
         "wspd_kt": round(last["WSPD"] * 1.943844, 1), "gst_kt": round(last["GST"] * 1.943844, 1),
     },
     "trajectory": trajectory,
+    "history": history,
     "daily": daily[:7],
 }
 
+# fold the five-season backtest into the site stats when it exists
+backtest_path = pathlib.Path("models/backtest.json")
+if backtest_path.exists():
+    with open(backtest_path) as fh:
+        bt = json.load(fh)
+    with open("models/qstats.json") as fh:
+        qs = json.load(fh)
+    qs["backtest"] = bt
+    with open("models/qstats.json", "w") as fh:
+        json.dump(qs, fh)
+
 pathlib.Path("site/reports").mkdir(parents=True, exist_ok=True)
-for png in ["model_comparison.png", "error_analysis.png", "correlations.png"]:
+for png in ["model_comparison.png", "error_analysis.png", "correlations.png", "backtest.png"]:
     src = pathlib.Path("reports") / png
     if src.exists():
         shutil.copy(src, pathlib.Path("site/reports") / png)

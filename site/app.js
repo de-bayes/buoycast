@@ -11,7 +11,8 @@
 
   function chart(canvas, opts) {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var w = canvas.clientWidth, h = parseInt(canvas.getAttribute('height'), 10);
+    if (!canvas.dataset.baseh) canvas.dataset.baseh = canvas.getAttribute('height');
+    var w = canvas.clientWidth, h = parseInt(canvas.dataset.baseh, 10);
     canvas.style.height = h + 'px';
     canvas.width = w * dpr;
     canvas.height = h * dpr;
@@ -95,6 +96,9 @@
       ['TRAINING ROWS', (stats.n_train / 1000).toFixed(0) + 'k'],
       ['FEATURES', String(stats.n_features)],
     ];
+    if (stats.backtest) {
+      chips.splice(4, 0, ['BACKTESTED PAIRS', (stats.backtest.total_pairs / 1000).toFixed(0) + 'k']);
+    }
     var cwrap = document.getElementById('chips');
     chips.forEach(function (c) {
       var d = document.createElement('div');
@@ -115,32 +119,75 @@
 
     /* fan, with a hover crosshair that tracks the cursor */
     var fanCanvas = document.getElementById('fan');
-    var fanHover = -1;
+    var fanHover = null;
+    var X0 = -48, X1 = 168;
     function drawFan() {
       var tr = data.trajectory;
+      var hist = data.history || [];
       var hs = tr.map(function (p) { return p.h; });
       var lo = Infinity, hi = -Infinity;
       tr.forEach(function (p) { lo = Math.min(lo, p.p05); hi = Math.max(hi, p.p95); });
-      lo = Math.floor(lo - 1); hi = Math.ceil(hi + 1);
+      hist.forEach(function (p) { lo = Math.min(lo, p.f); hi = Math.max(hi, p.f); });
+      lo = Math.floor(lo - 0.5); hi = Math.ceil(hi + 0.5);
       var xt = [];
-      tr.forEach(function (p) {
+      hist.concat(tr).forEach(function (p) {
         var d = new Date(p.t);
-        if (d.getUTCHours() === 0) xt.push({ v: p.h, label: d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' }) });
+        if (d.getUTCHours() === 0) {
+          xt.push({ v: p.h, label: d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric', timeZone: 'UTC' }) });
+        }
       });
       var g = chart(fanCanvas,
-        { x0: 0, x1: 168, y0: lo, y1: hi, yTicks: ticksFor(lo, hi, 2), yUnit: '°', xTicks: xt, xGrid: true });
+        { x0: X0, x1: X1, y0: lo, y1: hi, yTicks: ticksFor(lo, hi, 1), yUnit: '°', xTicks: xt, xGrid: true, padR: 44 });
+
+      // observed history, then the forecast fan
       band(g, hs, tr.map(function (p) { return p.p05; }), tr.map(function (p) { return p.p95; }), 'rgba(57,194,255,0.12)');
       band(g, hs, tr.map(function (p) { return p.p25; }), tr.map(function (p) { return p.p75; }), 'rgba(57,194,255,0.20)');
+      line(g, hist.map(function (p) { return p.h; }), hist.map(function (p) { return p.f; }), C.white, 1.5);
       line(g, hs, tr.map(function (p) { return p.p50; }), C.cyan, 2.2);
+
+      // now divider
+      line(g, [0, 0], [lo, hi], 'rgba(207,220,232,0.35)', 1, [4, 4]);
       g.ctx.fillStyle = C.white;
       g.ctx.beginPath();
       g.ctx.arc(g.x(0), g.y(data.now.wtmp_f), 3.5, 0, Math.PI * 2);
       g.ctx.fill();
       g.ctx.textAlign = 'left';
-      g.ctx.fillText('now ' + data.now.wtmp_f.toFixed(1) + '°', g.x(0) + 7, g.y(data.now.wtmp_f) - 7);
+      g.ctx.fillText('now ' + data.now.wtmp_f.toFixed(1) + '°', g.x(0) + 7, g.y(data.now.wtmp_f) - 9);
+      g.ctx.fillStyle = C.faint;
+      g.ctx.fillText('observed', g.x(X0) + 4, g.padT + 10);
+      g.ctx.fillStyle = C.muted;
+      g.ctx.fillText('forecast', g.x(8), g.padT + 10);
 
-      if (fanHover >= 0 && fanHover < tr.length) {
-        var p = tr[fanHover];
+      // right-edge quantile labels
+      var end = tr[tr.length - 1];
+      [['p95', C.faint, 'P95'], ['p50', C.cyan, 'P50'], ['p05', C.faint, 'P5']].forEach(function (kq) {
+        g.ctx.fillStyle = kq[1];
+        g.ctx.textAlign = 'left';
+        g.ctx.fillText(kq[2] + ' ' + end[kq[0]].toFixed(1) + '°', g.x(168) + 5, g.y(end[kq[0]]) + 3);
+      });
+
+      if (fanHover !== null && fanHover < 0) {
+        // hovering the observed side: simple readout
+        var hp = null;
+        hist.forEach(function (q) { if (q.h === fanHover) hp = q; });
+        if (hp) {
+          var hx = g.x(hp.h);
+          g.ctx.strokeStyle = 'rgba(207,220,232,0.5)';
+          g.ctx.lineWidth = 1;
+          g.ctx.beginPath();
+          g.ctx.moveTo(hx, g.padT);
+          g.ctx.lineTo(hx, g.padT + g.ph);
+          g.ctx.stroke();
+          g.ctx.fillStyle = C.white;
+          g.ctx.beginPath();
+          g.ctx.arc(hx, g.y(hp.f), 3, 0, Math.PI * 2);
+          g.ctx.fill();
+          g.ctx.textAlign = 'center';
+          g.ctx.fillText('observed ' + hp.f.toFixed(1) + '°', hx, g.y(hp.f) - 10);
+        }
+      }
+      if (fanHover !== null && fanHover >= 1 && fanHover <= tr.length) {
+        var p = tr[fanHover - 1];
         var cx = g.x(p.h);
         g.ctx.strokeStyle = 'rgba(255, 91, 209, 0.8)';
         g.ctx.lineWidth = 1;
@@ -186,14 +233,14 @@
     function fanMove(e) {
       var rect = fanCanvas.getBoundingClientRect();
       var clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      var frac = (clientX - rect.left - 42) / (rect.width - 56);
-      var h = Math.round(frac * 168);
-      var idx = Math.max(0, Math.min(data.trajectory.length - 1, h - 1));
-      if (idx !== fanHover) { fanHover = idx; drawFan(); }
+      var frac = (clientX - rect.left - 42) / (rect.width - 42 - 44);
+      var h = Math.round(X0 + frac * (X1 - X0));
+      h = Math.max(X0, Math.min(X1, h));
+      if (h !== fanHover) { fanHover = h; window.requestAnimationFrame(drawFan); }
     }
     fanCanvas.addEventListener('mousemove', fanMove);
     fanCanvas.addEventListener('touchmove', fanMove);
-    fanCanvas.addEventListener('mouseleave', function () { fanHover = -1; drawFan(); });
+    fanCanvas.addEventListener('mouseleave', function () { fanHover = null; window.requestAnimationFrame(drawFan); });
 
     /* daily digest */
     var dg = document.getElementById('digest');
@@ -297,7 +344,8 @@
       var canvas = document.getElementById('importance');
       var imp = stats.importance;
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var w = canvas.clientWidth, hgt = parseInt(canvas.getAttribute('height'), 10);
+      if (!canvas.dataset.baseh) canvas.dataset.baseh = canvas.getAttribute('height');
+      var w = canvas.clientWidth, hgt = parseInt(canvas.dataset.baseh, 10);
       canvas.style.height = hgt + 'px';
       canvas.width = w * dpr; canvas.height = hgt * dpr;
       var ctx = canvas.getContext('2d');
@@ -321,6 +369,22 @@
       ctx.fillStyle = C.muted;
       ctx.textAlign = 'left';
     });
+
+    /* backtest card */
+    if (stats.backtest) {
+      var bt = stats.backtest;
+      var i24 = bt.horizons.indexOf(24);
+      var iEnd = bt.horizons.length - 1;
+      document.getElementById('backtest-card').hidden = false;
+      document.getElementById('backtest-cap').textContent =
+        bt.total_pairs.toLocaleString() + ' forecast/outcome pairs across ' + bt.folds.length +
+        ' season-end windows (' + bt.folds.map(function (f) { return f.name; }).join(', ') +
+        '), each fold trained only on data ending 8 days before its window. Five-season mean MAE: ' +
+        bt.mean_mae[i24].toFixed(2) + '°F at +24h and ' + bt.mean_mae[iEnd].toFixed(2) +
+        '°F at +168h, vs persistence at ' + bt.mean_mae_persist[i24].toFixed(2) + ' and ' +
+        bt.mean_mae_persist[iEnd].toFixed(2) + '. Mean 90% band coverage ' +
+        Math.round(bt.mean_cover90.reduce(function (a, b) { return a + b; }, 0) / bt.mean_cover90.length * 100) + '%.';
+    }
 
     /* validation table */
     var tbl = document.getElementById('stat-table');
