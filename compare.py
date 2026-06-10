@@ -108,21 +108,28 @@ for h in features.HORIZONS:
 with open("models/metrics.json", "w") as fh:
     json.dump(metrics, fh, indent=2)
 
-# chart: test MAE by horizon, one line per model
+# chart: test MAE by horizon, one line per model (dark, matches the site)
 import pathlib
 pathlib.Path("reports").mkdir(exist_ok=True)
-fig, ax = plt.subplots(figsize=(8, 5))
+plt.style.use("dark_background")
+BG, PANEL, INK, FAINT = "#0a0c0e", "#101418", "#cfdce8", "#5d7283"
+PALETTE = {"persistence": FAINT, "ridge": "#ffd23e", "lasso": "#3ddc6a", "knn": "#ff4d4d",
+           "random_forest": "#b78ce8", "extra_trees": "#c98a5a", "hist_gb": "#ff5bd1"}
+fig, ax = plt.subplots(figsize=(9, 5.2), facecolor=BG)
+ax.set_facecolor(PANEL)
 names = ["persistence"] + list(zoo().keys())
 for name in names:
-    ys = [results[f"+{h}h"][name]["test_mae"] for h in features.HORIZONS]
-    ax.plot(features.HORIZONS, ys, marker="o", lw=2 if name != "persistence" else 1.4,
-            ls="-" if name != "persistence" else "--", label=name)
-ax.set_xlabel("forecast horizon (hours)")
-ax.set_ylabel("test MAE (deg C)")
-ax.set_title("Wilmette buoy water temp: model comparison on held-out test weeks")
+    ys = [results[f"+{h}h"][name]["test_mae"] * 1.8 for h in features.HORIZONS]
+    ax.plot(features.HORIZONS, ys, marker="o", color=PALETTE.get(name, INK),
+            lw=2.2 if name == "lasso" else 1.5,
+            ls="--" if name == "persistence" else "-", label=name)
+ax.set_xlabel("forecast horizon (hours)", color=INK)
+ax.set_ylabel("test MAE (deg F)", color=INK)
+ax.set_title("Model bake-off on held-out test weeks (lasso chosen by CV)", color="w", loc="left")
 ax.set_xticks(features.HORIZONS)
-ax.grid(alpha=0.25)
-ax.legend(frameon=False, fontsize=9)
+ax.grid(alpha=0.15)
+ax.tick_params(colors=INK)
+ax.legend(frameon=False, fontsize=9, labelcolor=INK)
 fig.tight_layout()
-fig.savefig("reports/model_comparison.png", dpi=150)
+fig.savefig("reports/model_comparison.png", dpi=150, facecolor=BG)
 print("\nsaved models/comparison.json and reports/model_comparison.png")

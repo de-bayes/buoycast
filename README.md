@@ -1,6 +1,32 @@
 # buoycast
 
-ML forecasts of nearshore water temperature (and, honestly, not wave height) from the Wilmette buoy, NDBC station 45174, a few miles up the shore from the Evanston beaches.
+ML water temperature forecasts for the Evanston-Wilmette lakefront, from hourly out to seven days, built on the Wilmette buoy (NDBC 45174), ERA5 reanalysis, and the GFS/HRRR forecast. Ships with a dashboard in `site/` (plain static, Vercel-ready).
+
+## Pipeline
+
+```bash
+python3 fetch.py           # buoy history 2021-2025 + 45-day realtime -> data/buoy.csv
+python3 fetch_weather.py   # ERA5 history + 8-day GFS/HRRR forecast -> data/weather*.csv
+python3 corr.py            # driver study figure (justifies the features)
+python3 train7.py          # weather-aware hourly + daily models, held-out validation
+python3 analysis.py        # error anatomy figure
+python3 publish.py         # live forecast -> site/data.json + figures -> site/reports/
+```
+
+## Headline results (held-out test, deg F MAE)
+
+| Lead | Persistence | Lags only | Weather-aware |
+| --- | --- | --- | --- |
+| +6 h | 0.73 | 0.56 | 0.50 |
+| +24 h | 1.23 | 1.08 | 0.83 |
+| D+3 | 2.02 | -- | 1.43 |
+| D+7 | 4.05 | -- | 1.63 |
+
+The driver study (`reports/correlations.png`) shows why: weather during the forecast window (the air-water temperature gap, sustained wind speed, solar input, the alongshore wind that drives upwelling) carries 2 to 4x the correlation with future water change of anything in the buoy's own past. Training uses ERA5 as a stand-in for forecast weather, so live skill at D+5 to D+7 inherits the weather forecast's own error and runs somewhat worse than these numbers.
+
+---
+
+The original buoy-only experiment is below; it remains accurate for the lags-only models.
 
 ## How it works
 

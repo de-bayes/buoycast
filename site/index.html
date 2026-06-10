@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buoycast | ML Water Temperature Forecasts for the Evanston Lakefront</title>
+  <meta name="description" content="Machine-learned water temperature forecasts from the Wilmette buoy: hourly to 7 days, validated against persistence, with full error analysis.">
+  <link rel="stylesheet" href="/style.css">
+  <meta name="theme-color" content="#0a0c0e">
+</head>
+<body>
+  <header class="top">
+    <div class="top__brand">
+      <h1>BUOYCAST</h1>
+      <p>Machine-learned water temperature forecasts &middot; Wilmette buoy 45174 &middot; Evanston-Wilmette lakefront</p>
+    </div>
+    <p class="top__stamp" id="stamp">loading&hellip;</p>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="card card--now">
+        <p class="card__kicker">IN THE WATER NOW</p>
+        <p class="now__big" id="now-wtmp">--</p>
+        <div class="now__grid" id="now-grid"></div>
+        <p class="now__note">Observed by the buoy, updated every 10 minutes in season.</p>
+      </div>
+      <div class="card card--fan">
+        <p class="card__kicker">SEVEN-DAY WATER TEMPERATURE FORECAST</p>
+        <canvas id="fan" height="280"></canvas>
+        <p class="card__cap">Shaded band is the model's held-out test error (MAE) at each lead. Daily mean water temperature, UTC days.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <p class="card__kicker">NEXT 24 HOURS</p>
+      <canvas id="hourly" height="170"></canvas>
+    </section>
+
+    <section class="card">
+      <p class="card__kicker">DOES THE MODEL ACTUALLY BEAT GUESSING? (HELD-OUT TEST ERROR, °F)</p>
+      <div class="skillrow">
+        <div><h3>Hourly model</h3><canvas id="skill-hourly" height="230"></canvas></div>
+        <div><h3>Daily model to 7 days</h3><canvas id="skill-daily" height="230"></canvas></div>
+      </div>
+      <p class="card__cap">Persistence = "the water will be what it is now", the baseline any honest forecast must beat. Lags-only is the model without weather forecasts. The full model folds in forecast wind, air temperature, and solar radiation over the prediction window.</p>
+    </section>
+
+    <section class="card">
+      <p class="card__kicker">WHY IT WORKS: THE DRIVER STUDY</p>
+      <img src="/reports/correlations.png" alt="Correlation of weather drivers with next-24h water temperature change">
+      <p class="card__cap">Five years of buoy observations joined with ERA5 reanalysis. Knowing the weather during the forecast window (cyan) carries two to four times the signal of anything in the buoy's past (gray): the air-water temperature gap, sustained wind speed (mixing), solar input, and the north-south wind that drives upwelling along this shoreline.</p>
+    </section>
+
+    <section class="card">
+      <p class="card__kicker">MODEL SELECTION</p>
+      <img src="/reports/model_comparison.png" alt="Model comparison across forecast horizons">
+      <p class="card__cap">Six model families ranked by walk-forward cross-validation inside the training years, then scored once on untouched test weeks. Regularized linear regression (lasso) wins at every horizon: with informative lag and forecast-window features, the problem is close to linear and tree ensembles only add variance.</p>
+    </section>
+
+    <section class="card">
+      <p class="card__kicker">ERROR ANATOMY</p>
+      <img src="/reports/error_analysis.png" alt="Error analysis: growth with lead time, bias, swing-binned error, test timeline">
+      <p class="card__cap">Median absolute error stays under 1°F through 24 hours and the distributions are unbiased. The errors concentrate where the water itself moves several degrees in a day, the upwelling and mix-down events, which is exactly the gap the forecast-weather covariates attack.</p>
+    </section>
+
+    <section class="card card--method">
+      <p class="card__kicker">METHODOLOGY</p>
+      <div class="method">
+        <div>
+          <h3>Data</h3>
+          <p>NDBC station 45174 (Wilmette buoy) standard meteorological records, 2021 to present, hourly means. ERA5 reanalysis supplies historical weather over the site; the GFS/HRRR blend supplies forecast weather at inference. Both via open, keyless APIs; the forecast models are the same NOAA physics behind NWS products.</p>
+        </div>
+        <div>
+          <h3>Models</h3>
+          <p>One lasso regression per horizon: +3, +6, +12, +24 hours and daily means D+1 through D+7. Features are buoy lags and trends, seasonal clocks, and weather aggregated over the forecast window (wind vectors, speed, gusts, air temperature, solar). Alpha chosen by time-series CV inside the training span.</p>
+        </div>
+        <div>
+          <h3>Validation</h3>
+          <p>The final weeks are an untouched test set; model choice happens by walk-forward CV strictly inside the training years. Persistence is reported next to every number. Training uses reanalysis as a stand-in for forecast weather (perfect-prog), so live skill at D+5 to D+7 inherits the weather forecast's own error and will run somewhat worse than the test numbers.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Open data: NOAA NDBC, ERA5 (Copernicus), GFS/HRRR via Open-Meteo. The buoy is seasonal (roughly May to November). Not an official forecast; for safety decisions use NWS Chicago.</p>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
