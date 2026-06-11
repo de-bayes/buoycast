@@ -1,0 +1,10 @@
+[Unit]
+Description=run buoycast retrain weekly
+
+[Timer]
+OnCalendar=Sun *-*-* 09:30:00 UTC
+RandomizedDelaySec=600
+Persistent=true
+
+[Install]
+WantedBy=timers.target

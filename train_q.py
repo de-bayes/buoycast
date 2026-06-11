@@ -66,7 +66,7 @@ for q in featuresq.QUANTILES:
 
 stats = {"horizons": [], "n_train": int(tr.sum()), "n_test": int(te.sum()),
          "n_features": X.shape[1], "n_hours": int(buoy["WTMP"].notna().sum()),
-         "seasons": "2021-2026", "test_days": TEST_DAYS}
+         "seasons": "2016-2026", "test_days": TEST_DAYS}
 for hz in featuresq.HSET:
     m = hte == hz
     if m.sum() < 50:

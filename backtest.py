@@ -36,6 +36,8 @@ folds.append(("2026", t.max() - pd.Timedelta(days=35), t.max()))
 
 results = {"folds": [], "horizons": featuresq.HSET}
 total_pairs = 0
+resid_by_h = {hz: [] for hz in featuresq.HSET}  # anchored-median residuals (deg C)
+band_by_h = {hz: [] for hz in featuresq.HSET}   # 90% quantile-band span (deg C)
 for name, wstart, wend in folds:
     tr = t <= (wstart - pd.Timedelta(days=8))
     te = (t >= wstart) & (t <= wend)
@@ -71,6 +73,8 @@ for name, wstart, wend in folds:
         fold["mae"].append(round(float(np.mean(np.abs(pred[0.5][m] - yte[m]))) * CF, 3))
         fold["mae_persist"].append(round(float(np.mean(np.abs(persist[m] - yte[m]))) * CF, 3))
         fold["cover90"].append(round(float(np.mean((yte[m] >= pred[0.05][m]) & (yte[m] <= pred[0.95][m]))), 3))
+        resid_by_h[hz].append(pred[0.5][m] - yte[m])
+        band_by_h[hz].append(pred[0.95][m] - pred[0.05][m])
     results["folds"].append(fold)
     total_pairs += int(te.sum())
     at24 = fold["mae"][featuresq.HSET.index(24)]
@@ -82,6 +86,35 @@ mean = lambda key, i: round(float(np.mean([f[key][i] for f in results["folds"] i
 results["mean_mae"] = [mean("mae", i) for i in range(len(featuresq.HSET))]
 results["mean_mae_persist"] = [mean("mae_persist", i) for i in range(len(featuresq.HSET))]
 results["mean_cover90"] = [mean("cover90", i) for i in range(len(featuresq.HSET))]
+
+# band calibration straight from the pooled out-of-sample residuals across all
+# folds: the empirical 5/25/75/95 quantiles of the anchored median's error per
+# horizon (deg C). publish.py turns these into the displayed bands, so the 90%
+# band covers ~90% by construction on 100k+ genuinely out-of-sample pairs
+# instead of on one recent month.
+calib = {}
+for hz in featuresq.HSET:
+    if not resid_by_h[hz]:
+        continue
+    r = np.concatenate(resid_by_h[hz])
+    b = np.concatenate(band_by_h[hz])
+    # split-conformal quantiles: the finite-sample rank correction means the
+    # resulting fences guarantee >= nominal coverage on exchangeable errors,
+    # not just observed coverage. Upper fences round their rank up, lower
+    # fences round down, per the standard ceil((n+1)q)/n construction.
+    n = r.size
+    hi = lambda q: float(np.quantile(r, min(1.0, np.ceil((n + 1) * q) / n), method="higher"))
+    lo = lambda q: float(np.quantile(r, max(0.0, np.floor((n + 1) * q) / n), method="lower"))
+    calib[str(hz)] = {
+        "e05": round(lo(0.05), 4),
+        "e25": round(lo(0.25), 4),
+        "e75": round(hi(0.75), 4),
+        "e95": round(hi(0.95), 4),
+        "band90_mean_c": round(float(np.mean(b)), 4),
+        "n": int(n),
+        "conformal": True,
+    }
+results["calib"] = calib
 
 with open("models/backtest.json", "w") as fh:
     json.dump(results, fh)

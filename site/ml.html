@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How the model works | Buoycast</title>
+  <meta name="description" content="A plain-language, animated explainer of how Buoycast forecasts Lake Michigan water temperature: gradient boosting, quantile bands, anchoring, and a four-model weather ensemble.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=4">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="/">Buoycast</a>
+      <nav class="nav__links">
+        <a href="/" class="nav__primary">Forecast</a>
+        <a href="/ml" aria-current="page">How the model works</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section class="ml-hero reveal">
+        <p class="ml-hero__kicker">How it works</p>
+        <h1>How a computer learns the lake</h1>
+        <p>Buoycast predicts the water temperature off the Evanston and Wilmette shoreline for the next seven days, with an honest range around every number. Here is how it actually works, one idea at a time. Everything below is live and runs in your browser.</p>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">01 &middot; The question</span>
+          <h2>Predict the next 168 hours, and say how sure you are</h2>
+          <p>Every hour the Wilmette buoy reports the water temperature. The job is to forecast what it will read for each of the next seven days, not just a single guess, but a <b>shaded band</b> that is narrow when the next hours are knowable and wide when they are not.</p>
+          <p>A forecast without a band is a guess pretending to be a fact. The band is the honest part.</p>
+        </div>
+        <div class="ml-fig"><canvas id="a-fan" height="240"></canvas><p class="ml-fig__cap"><span>the forecast fan, drawing out from now</span><button id="replay-fan">&#8635; replay</button></p></div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">02 &middot; The data</span>
+          <h2>Ten years of the lake, hour by hour</h2>
+          <p>The model has studied roughly <b>600,000 examples</b>: every past hour paired with what the water actually did next, alongside the weather at the time. From these it learns the lake's habits. Calm warm days nudge the surface up; a hard north wind overturns the water and the temperature can fall several degrees overnight.</p>
+          <p>No rules are written by hand. The patterns are discovered from the record.</p>
+        </div>
+        <div class="ml-fig">
+          <div class="ml-counters">
+            <div class="c"><b class="count" data-to="599000" data-suffix="">0</b><span>training examples</span></div>
+            <div class="c"><b class="count" data-to="10" data-suffix="">0</b><span>seasons, 2016 to 2026</span></div>
+            <div class="c"><b class="count" data-to="46" data-suffix="">0</b><span>inputs per example</span></div>
+            <div class="c"><b class="count" data-to="131000" data-suffix="">0</b><span>out-of-sample checks</span></div>
+          </div>
+          <p class="ml-fig__cap"><span>numbers behind the model</span></p>
+        </div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">03 &middot; Turning history into examples</span>
+          <h2>The model never sees a summer, only rows</h2>
+          <p>A computer cannot study a season the way a person remembers one. What it studies is a long stack of <b>rows</b>. Each row is a single frozen moment described by 46 numbers, the recent water temperatures, the wind, the sun, the air temperature, the time of year, and how far ahead we are asking, set next to the one answer that moment eventually produced: what the water actually read that far in the future.</p>
+          <p>Ten years of hourly readings becomes roughly 600,000 of these question-and-answer rows. Learning, in this setting, means nothing more mysterious than finding rules that turn the 46 numbers on the left into the answer on the right, again and again, across every row at once.</p>
+        </div>
+        <div class="ml-fig"><canvas id="a-window" height="240"></canvas><p class="ml-fig__cap"><span>one moment in, one answer out, repeated across the record</span><button id="replay-window">&#8635; replay</button></p></div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">04 &middot; What one tree does</span>
+          <h2>A single yes-or-no question, and two averages</h2>
+          <p>Before stacking hundreds of trees, it helps to watch exactly one. A <b>decision tree</b> at its simplest asks a single question of a single input, something like &ldquo;is the wind above 7 m/s?&rdquo;, and then gives one flat average answer for everything on the yes side and another for everything on the no side. To pick the question, it sweeps every possible threshold, measures how much error each one leaves behind, and keeps the split that fits best.</p>
+          <p>One question is a blunt instrument, and that is exactly the point. A single tree can only ever draw one step. The power comes from stacking corrections, hundreds of these blunt trees in a row, each fixing what the last one got wrong, which is the next section.</p>
+        </div>
+        <div class="ml-fig"><canvas id="a-tree" height="240"></canvas><p class="ml-fig__cap"><span id="tree-label">sweeping the threshold to find the split that fits best</span><button id="replay-tree">&#8635; replay</button></p></div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">05 &middot; The engine</span>
+          <h2>A thousand tiny corrections, stacked</h2>
+          <p>The model is not one clever formula. It is a stack of hundreds of <b>tiny decision trees</b>, built one after another. The first makes a crude guess. The second learns only to fix the first one's mistakes. The third fixes what is still wrong, and so on.</p>
+          <p>Each tree is simple and almost useless alone. Stacked, they bend to the true shape of the data. This is <b>gradient boosting</b>: watch the staircase chase the curve.</p>
+        </div>
+        <div class="ml-fig"><canvas id="a-boost" height="240"></canvas><p class="ml-fig__cap"><span id="boost-label">trees: 0 &middot; error: &ndash;</span><button id="boost-replay">&#8635; replay</button></p></div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">06 &middot; The bake-off</span>
+          <h2>Four ways to learn the same lake</h2>
+          <p>We do not take one algorithm's word for it. The same training data is handed to four different learners: <b>ridge regression</b>, which draws the straightest defensible line; <b>Bayesian ridge</b>, which keeps uncertainty about its own coefficients; a <b>random forest</b>, hundreds of decorrelated trees averaged; and <b>gradient boosting</b>, the staircase from the previous section. Each predicts the held-out month, and each gets a percentage weight tuned on data none of them trained on.</p>
+          <p>The weights are learned on held-out data none of the four trained on, not assigned by us, which is why the two linear models landed at exactly 0 percent. A straight line cannot bend around the lake's nonlinear swings, so ridge scored 1.29 degrees on the unseen test against boosting's 1.12, and with 600,000 training rows the Bayesian prior washes out entirely, which is why Bayesian ridge ties plain ridge to the fourth decimal. The optimizer handing both of them 0 percent is the system being honest about which learners earned their place, not a snub. With the real numbers in hand, the tuned weights chose forest 45 percent and boosting 55 percent, yet that mix beat boosting alone by only 0.01 degrees, within noise, and a plain 50/50 average of forest and boosting actually looked better on that validation window. Tuning the weights had memorized the validation month, the same trap as section 11, so we vetted the average the hard way: replayed across nine past seasons against rules written down in advance, it won only 4 of 9 and its early lead vanished. Nothing shipped. Boosting alone kept its crown, and this section is the receipt that we checked.</p>
+        </div>
+        <div class="ml-fig"><canvas id="a-bakeoff" height="260"></canvas><p class="ml-fig__cap"><span>four learners fit the same dots &middot; learned weights &middot; the composite on top</span><button id="replay-bakeoff">&#8635; replay</button></p></div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">07 &middot; The band</span>
+          <h2>It predicts a range, not a number</h2>
+          <p>Instead of one temperature, the model is trained five separate times to predict the <b>5th, 25th, 50th, 75th and 95th percentiles</b> of what could happen. The middle one is the headline forecast; the outer ones are the edges of the band.</p>
+          <p>So the band is not decoration bolted on afterward. The model is asked, directly, &ldquo;where is the cold tail, where is the warm tail?&rdquo;</p>
+          <p>We do not take the band the model draws on faith. We collect 131,339 real out-of-sample misses from nine replayed seasons, sort them smallest to largest, and read off the fences that contain 90 percent of them, plus a small safety margin the math requires (statisticians call this conformal calibration). The result is a guarantee of at least 90 percent coverage rather than a habit we happened to observe, resting on one honest assumption: that future misses behave like nine seasons of past ones.</p>
+        </div>
+        <div class="ml-fig"><canvas id="a-quant" height="240"></canvas><p class="ml-fig__cap"><span>each dot is one outcome &middot; the bands should catch them at the right rate</span><button id="replay-quant">&#8635; replay</button></p></div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">08 &middot; Anchoring</span>
+          <h2>Always start from the reading on the buoy right now</h2>
+          <p>A model that ignored the current temperature would be silly. So the whole trajectory is <b>slid to match the live buoy</b>, and that correction fades over the first day: the next hour is almost certain, next week far less so.</p>
+          <p>It is the difference between &ldquo;the water is usually 64&deg; this week&rdquo; and &ldquo;it is 65.2&deg; right now, so start there.&rdquo;</p>
+        </div>
+        <div class="ml-fig"><canvas id="a-anchor" height="240"></canvas><p class="ml-fig__cap"><span>raw model (dashed) snapping to the live reading (dot)</span><button id="replay-anchor">&#8635; replay</button></p></div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">09 &middot; The ensemble</span>
+          <h2>Thirty-four futures vote on the band</h2>
+          <p>The biggest unknown is not the lake, it is the weather. So the forecast is run <b>34 times</b>: once on each of the 31 members of NOAA's GEFS ensemble, the same atmosphere model started from 31 slightly different versions of right now, because tiny differences today grow into different weather by Friday. The European, German and Canadian models join them for diversity. When the futures agree, the band is tight. When they split over a coming front, the band widens to match the genuine doubt.</p>
+          <p>Drag the slider: as the members disagree more, the shaded band grows.</p>
+        </div>
+        <div class="ml-fig">
+          <canvas id="a-ens" height="240"></canvas>
+          <input id="ens-slider" type="range" min="0" max="100" value="35">
+          <p class="ml-fig__cap"><span id="ens-label">weather-model disagreement: low</span><button id="replay-ens">&#8635; replay</button></p>
+        </div>
+      </section>
+
+      <section class="ml-wide reveal">
+        <div class="ml-wide__head">
+          <span class="num">10 &middot; The whole machine</span>
+          <h2>From raw readings to a banded forecast, end to end</h2>
+          <p>Every hour this whole assembly runs once, top to bottom, with nothing hidden. What follows is the entire path from the raw instruments to the shaded band: four data sources, the real 46 inputs, five quantile models replayed across 34 weather futures, and the single banded forecast that falls out the far side.</p>
+        </div>
+        <div class="ml-fig"><canvas id="a-pipeline" height="560"></canvas><p class="ml-fig__cap"><span id="pipeline-label">reading the instruments</span><button id="replay-pipeline">&#8635; replay</button></p></div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">11 &middot; Memorizing is not learning</span>
+          <h2>A perfect score on the past can be worthless</h2>
+          <p>Any model can look flawless on history by simply <b>memorizing</b> it, noise and all. The wiggly curve below threads exactly through every observation it was shown, hitting each one dead on, and for a moment it appears perfect. Then new readings arrive that it never saw, and it lurches wildly between them, because it learned the dots rather than the shape behind them.</p>
+          <p>The smooth curve does the opposite. It accepts small errors on the past in exchange for staying close to the truth on data it has not seen. Everything about how buoycast is trained and tested, the held-out window, the gap, the nine replayed seasons, exists to catch memorization before it can masquerade as skill.</p>
+        </div>
+        <div class="ml-fig"><canvas id="a-overfit" height="240"></canvas><p class="ml-fig__cap"><span>fits the past perfectly, fails on new data, versus learns the shape</span><button id="replay-overfit">&#8635; replay</button></p></div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">12 &middot; The proof</span>
+          <h2>Tested on seasons it never saw</h2>
+          <p>It is easy to fit the past. The honest test is to <b>train on the past and predict a stretch the model has never seen</b>, then score it. Buoycast replays nine past seasons this way, 131,000 forecast-and-check pairs, always with a gap so no answer leaks into training.</p>
+          <p>It beats the naive &ldquo;tomorrow equals today&rdquo; baseline from about a day and a half out, and by day seven it is more than twice as accurate.</p>
+        </div>
+        <div class="ml-fig"><canvas id="a-walk" height="240"></canvas><p class="ml-fig__cap"><span>train on the filled stretch &middot; predict the unseen window &middot; score &middot; slide forward</span><button id="replay-walk">&#8635; replay</button></p></div>
+      </section>
+
+      <section class="ml-step reveal">
+        <div class="ml-step__text">
+          <span class="num">13 &middot; The scoreboard</span>
+          <h2>So how good is it, honestly?</h2>
+          <p>Twelve sections explain how it works. This one says how well, on those 131,339 replayed forecasts. Inside a day, the model is <b>no better than assuming the water stays exactly where it is</b>. That is not failure, it is physics: the lake has enormous thermal inertia, and the forecast already starts pinned to the live buoy. There is simply little left to predict an hour ahead.</p>
+          <p>The value shows up from two days out, where knowing the coming weather starts to matter, and grows from there: by day seven the model is nearly <b>twice as accurate</b> as the do-nothing baseline. One more honest wrinkle: most replayed seasons are placid autumns where doing nothing is genuinely hard to beat, yet in the volatile spring 2026 window the model won even at one day ahead, 0.89 versus 1.30 degrees. It earns its keep exactly when the water is about to do something.</p>
+        </div>
+        <div class="ml-fig">
+          <table class="ml-table">
+            <tr><th>lead</th><th>model error</th><th>"no change" error</th><th>edge</th></tr>
+            <tr><td>+1 hour</td><td>0.09&deg;F</td><td>0.09&deg;F</td><td class="tie">tie</td></tr>
+            <tr><td>+6 hours</td><td>0.43&deg;F</td><td>0.41&deg;F</td><td class="tie">tie</td></tr>
+            <tr><td>+1 day</td><td>0.82&deg;F</td><td>0.79&deg;F</td><td class="tie">tie</td></tr>
+            <tr><td>+2 days</td><td>1.05&deg;F</td><td>1.21&deg;F</td><td class="win">+13%</td></tr>
+            <tr><td>+3 days</td><td>1.20&deg;F</td><td>1.62&deg;F</td><td class="win">+26%</td></tr>
+            <tr><td>+5 days</td><td>1.48&deg;F</td><td>2.36&deg;F</td><td class="win">+37%</td></tr>
+            <tr><td>+7 days</td><td>1.62&deg;F</td><td>3.03&deg;F</td><td class="win">+47%</td></tr>
+          </table>
+          <p class="ml-fig__cap"><span>mean absolute error, nine held-out seasons &middot; fences conformal with a finite-sample margin, so 90% means at least 90%</span></p>
+        </div>
+      </section>
+
+      <section class="ml-next reveal">
+        <h2>Where it stands</h2>
+        <p>The standard is the same for everything here: prove it across nine seasons or it does not ship.</p>
+        <div class="next-grid">
+          <div class="next-card">
+            <span class="tag">Shipped</span>
+            <h3>What made it in</h3>
+            <p>The 34-member weather ensemble that drives the band: 31 GEFS futures plus the European, German, and Canadian national models. And conformal calibration of the band itself, so 90 percent coverage is a finite-sample guarantee rather than a habit we hope holds.</p>
+            <span class="lift">live in the forecast today</span>
+          </div>
+          <div class="next-card">
+            <span class="tag">Tested and rejected</span>
+            <h3>What did not survive</h3>
+            <p>Tuned and equal regression blends, offshore and onshore wind features, a neighbor buoy, season degree-days, wind-stress memory. Then the big three: NASA satellite temperature maps of the whole lake, NOAA's 3D lake physics model interrogated at this exact buoy, and Chicago's nearshore beach sensors. The satellite and physics features genuinely helped in violent seasons, including a tenth of a degree in the worst bust year on record here, but they consistently taxed the calm seasons, and a seed-stability check confirmed the tax was real. Rules written in advance said that fails. It failed.</p>
+            <span class="lift">honest negative results</span>
+          </div>
+          <div class="next-card">
+            <span class="tag">On the bench</span>
+            <h3>What waits for the same trial</h3>
+            <p>A 14-day horizon: the weather feeds reach 16 days and a 51-member European ensemble is free, so the only question is whether the bands stay honest that far out. And a sharper idea from the rejections above: use the satellite and physics signals only when the lake is in a volatile regime, since that is precisely where they earned their keep.</p>
+            <span class="lift">promising, not yet proven</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="foot__inner">
+      <p>Open data: NOAA NDBC, ERA5 (Copernicus), GFS / ECMWF / ICON / GEM via Open-Meteo. The animations above are illustrations of the methods, not the live model.</p>
+      <nav class="foot__nav">
+        <a href="/">Forecast</a>
+        <a href="/ml">How the model works</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var nav = document.getElementById('nav');
+      function onScroll() { nav.classList.toggle('is-scrolled', window.scrollY > 8); }
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var items = document.querySelectorAll('.reveal');
+      if (reduce || !('IntersectionObserver' in window)) {
+        items.forEach(function (el) { el.classList.add('is-in'); });
+      } else {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+          });
+        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+        items.forEach(function (el) { io.observe(el); });
+      }
+    })();
+  </script>
+  <script src="/ml.js?v=8"></script>
+</body>
+</html>

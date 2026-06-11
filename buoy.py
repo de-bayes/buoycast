@@ -44,19 +44,19 @@ def fetch(url):
         return r.read().decode("utf-8", "replace")
 
 
-def fetch_history(years):
+def fetch_history(years, station=STATION):
     frames = []
     for y in years:
         try:
-            frames.append(read_stdmet(fetch(HIST_URL.format(station=STATION, year=y))))
+            frames.append(read_stdmet(fetch(HIST_URL.format(station=station, year=y))))
             print(f"  {y}: ok")
         except Exception as e:  # season gaps and missing years are expected
             print(f"  {y}: skipped ({e})")
     return frames
 
 
-def fetch_realtime():
-    return read_stdmet(fetch(REALTIME_URL.format(station=STATION)))
+def fetch_realtime(station=STATION):
+    return read_stdmet(fetch(REALTIME_URL.format(station=station)))
 
 
 def to_hourly(frames):

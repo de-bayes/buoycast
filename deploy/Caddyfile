@@ -1,0 +1,25 @@
+# Caddy config for buoycast. Replace the domain with yours; Caddy provisions
+# HTTPS automatically via Let's Encrypt once DNS points at the VM.
+#
+# Option A (everything on the VPS): this serves the whole site.
+# Option B (Vercel serves the site): the static site lives on Vercel and only
+# /data.json + /stats.json are read from here cross-origin; the CORS headers
+# below make that work. Set window.DATA_BASE in index.html to this origin.
+
+buoycast.example.com {
+	root * /opt/buoycast/site
+	encode gzip
+
+	# the forecast json must never be cached stale by browsers or proxies
+	@data path /data.json /stats.json
+	header @data Cache-Control "no-cache, max-age=60"
+	header @data Access-Control-Allow-Origin "*"
+
+	# static assets can cache normally
+	header /reports/* Cache-Control "public, max-age=3600"
+
+	# clean route for the explainer
+	rewrite /ml /ml.html
+
+	file_server
+}

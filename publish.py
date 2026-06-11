@@ -18,45 +18,97 @@ import fetch_weather
 TAU = 8.0
 F = lambda c: c * 1.8 + 32
 
-print("fetching buoy realtime and weather forecast...")
+MEMBER_LABEL = {"gfs_seamless": "GFS (NOAA)", "ecmwf_ifs025": "ECMWF",
+                "icon_seamless": "ICON (DWD)", "gem_seamless": "GEM (Canada)",
+                "gfs_blend": "GFS blend"}
+WIN = 7  # centered rolling window for display smoothing
+
+
+def smooth_fade(arr, hs):
+    """7-h centered smoothing that fades in by lead so h=1 stays pinned."""
+    s = pd.Series(arr).rolling(WIN, min_periods=1, center=True).mean().to_numpy()
+    w = np.clip((hs - 1) / 11.0, 0.0, 1.0)
+    return arr * (1 - w) + s * w
+
+
+print("fetching buoy realtime and weather ensemble...")
 hourly_buoy = buoy.to_hourly([buoy.fetch_realtime()])
-wx_fc = fetch_weather.frame(fetch_weather.get(
-    fetch_weather.FORECAST.format(lat=fetch_weather.LAT, lon=fetch_weather.LON)))
 wx_hist = pd.read_csv("data/weather.csv", index_col=0, parse_dates=True)
-wx = pd.concat([wx_hist, wx_fc])
-wx = wx[~wx.index.duplicated(keep="last")].sort_index()
+
+# 31 GEFS perturbed members (sampled weather uncertainty) plus the ECMWF /
+# ICON / GEM deterministic runs (model diversity GEFS alone cannot see).
+members_wx = {}
+try:
+    members_wx.update(fetch_weather.gefs_members())
+except Exception as e:
+    print(f"  GEFS ensemble skipped ({e})")
+try:
+    det = fetch_weather.member_forecasts(["ecmwf_ifs025", "icon_seamless", "gem_seamless"])
+    members_wx.update(det)
+except Exception as e:
+    print(f"  deterministic members skipped ({e})")
+if not members_wx:  # total fallback: the default blended forecast as one member
+    members_wx = {"gfs_blend": fetch_weather.frame(fetch_weather.get(
+        fetch_weather.FORECAST.format(lat=fetch_weather.LAT, lon=fetch_weather.LON)))}
+print(f"ensemble members: {len(members_wx)} ({', '.join(list(members_wx)[:4])}...)")
 
 t0 = hourly_buoy.index[-1]
 obs_now = float(hourly_buoy["WTMP"].ffill().iloc[-1])
 horizons = list(range(1, 169))
-rows = featuresq.inference_rows(hourly_buoy, wx, t0, horizons)
-
-models = {q: joblib.load(f"models/q_{int(q * 100):02d}.joblib") for q in featuresq.QUANTILES}
-raw = {q: models[q].predict(rows) for q in featuresq.QUANTILES}
-
-# anchor blend the median
 hs = np.array(horizons, dtype=float)
-delta = obs_now - raw[0.5][0]
 decay = np.exp(-(hs - 1) / TAU)
-p50 = raw[0.5] + delta * decay
 
-# calibrated bands: offsets from the median follow the empirical residual
-# quantiles measured on test per horizon (so they start tight and widen),
-# scaled by how wide the model thinks THIS situation is vs the test average,
-# and forced to widen monotonically with lead
+median_model = joblib.load("models/q_50.joblib")
+feat_cols = list(median_model.feature_names_in_)
+
+# run the water-temp model on each weather member (perfect-prog, no anchor yet)
+member_names, member_raw, wx_blend = [], [], None
+for name, fc in members_wx.items():
+    wxm = pd.concat([wx_hist, fc])
+    wxm = wxm[~wxm.index.duplicated(keep="last")].sort_index()
+    if wx_blend is None:
+        wx_blend = wxm  # first member also serves the past-forecast verification trace
+    rows = featuresq.inference_rows(hourly_buoy, wxm, t0, horizons).reindex(columns=feat_cols)
+    member_raw.append(median_model.predict(rows))
+    member_names.append(name)
+member_raw = np.vstack(member_raw)  # (K, 168) deg C
+
+# anchor each member individually: the current temperature is measured, not
+# uncertain, so every simulated future launches exactly from the observation
+# and the spread measures genuine divergence, not initial-condition bias
+deltas = obs_now - member_raw[:, 0]
+member_anch = member_raw + deltas[:, None] * decay[None, :]
+p50 = member_anch.mean(axis=0)
+sigma_wx = member_anch.std(axis=0, ddof=1) if member_anch.shape[0] > 1 else np.zeros_like(p50)
+member_disp = member_anch
+
+# bands = perfect-weather residual (backtest calibration) (+) weather-model spread,
+# combined in quadrature. The two are independent: the backtest residual is
+# measured under ERA5 (perfect weather), the ensemble spread is the weather term.
 with open("models/qstats.json") as fh:
     calib = json.load(fh)["calib"]
+bt_calib_path = pathlib.Path("models/backtest.json")
+if bt_calib_path.exists():
+    bc = json.load(open(bt_calib_path)).get("calib")
+    if bc:
+        calib = bc
+        print(f"using backtest calibration ({len(calib)} horizons)")
 ch = np.array(sorted(int(k) for k in calib))
-get = lambda key: np.interp(hs, ch, [calib[str(k)][key] for k in ch])
-band_now = raw[0.95] - raw[0.05]
-ratio = np.clip(band_now / np.maximum(get("band90_mean_c"), 0.1), 0.6, 1.6)
+getc = lambda key: np.interp(hs, ch, [calib[str(k)][key] for k in ch])
+# per-member anchoring already pins sigma to ~0 at h=1 and lets it grow with
+# lead, so no extra fade factor is needed on the weather term
+Z = {"e05": -1.645, "e25": -0.674, "e75": 0.674, "e95": 1.645}
 offsets = {}
-for key, sign in [("e05", -1), ("e25", -1), ("e75", 1), ("e95", 1)]:
-    mag = np.abs(get(key)) * ratio
-    offsets[key] = sign * np.maximum.accumulate(mag)
+for key in ["e05", "e25", "e75", "e95"]:
+    resid = np.abs(getc(key))                      # perfect-weather half-width (C)
+    wxterm = abs(Z[key]) * sigma_wx                 # weather-driven half-width (C)
+    mag = np.sqrt(resid ** 2 + wxterm ** 2)
+    offsets[key] = np.sign(Z[key]) * np.maximum.accumulate(mag)
+
 mat = np.sort(np.stack([
-    p50 + offsets["e05"], p50 + offsets["e25"], p50,
-    p50 + offsets["e75"], p50 + offsets["e95"],
+    smooth_fade(p50 + offsets["e05"], hs), smooth_fade(p50 + offsets["e25"], hs),
+    smooth_fade(p50, hs),
+    smooth_fade(p50 + offsets["e75"], hs), smooth_fade(p50 + offsets["e95"], hs),
 ]), axis=0)
 
 trajectory = []
@@ -84,20 +136,15 @@ for date, pts in sorted(byday.items()):
     })
 
 # verification trace: what the +24h forecast said for each recent hour, so
-# the chart shows model calls resolving against the observed line
-import features as basefeat
-import features7
-
-basef = basefeat.build(hourly_buoy)
-wxp = features7.prep_weather(wx)
-fut24 = featuresq.future_generic(wxp, 24, hourly_buoy["WTMP"])
-Xpast = basef.join(fut24, how="left")
-Xpast["h"] = 24.0
+# the chart shows model calls resolving against the observed line. Built via
+# the same assemble() the model was trained on, so the feature set matches.
+Xpast = featuresq.assemble(hourly_buoy, wx_blend, 24)
+Xpast = Xpast.reindex(columns=feat_cols)
 bases = [t0 - pd.Timedelta(hours=k) for k in range(72, 23, -1)]
 bases = [b for b in bases if b in Xpast.index]
 pastfc = []
 if bases:
-    p50_past = models[0.5].predict(Xpast.loc[bases])
+    p50_past = median_model.predict(Xpast.loc[bases])
     for b, v in zip(bases, p50_past):
         off = int((b + pd.Timedelta(hours=24) - t0) / pd.Timedelta(hours=1))
         pastfc.append({"h": off, "f": round(F(v), 2)})
@@ -105,6 +152,21 @@ if bases:
 hist_series = hourly_buoy["WTMP"].ffill().tail(49)
 history = [{"h": i - (len(hist_series) - 1), "t": ts.isoformat(), "f": round(F(v), 2)}
            for i, (ts, v) in enumerate(hist_series.items()) if pd.notna(v)]
+
+# per-member smoothed trajectories (the spaghetti)
+members_out = []
+for k, name in enumerate(member_names):
+    line = smooth_fade(member_disp[k], hs)
+    members_out.append({"model": MEMBER_LABEL.get(name, name),
+                        "traj": [round(F(v), 2) for v in line]})
+
+# uncertainty decomposition (90% half-widths, deg F): the irreducible part the
+# model carries even under perfect weather, and the part from weather-model
+# disagreement. They combine in quadrature to the published band.
+resid90 = np.maximum.accumulate((np.abs(getc("e05")) + np.abs(getc("e95"))) / 2)
+unc = [{"h": h, "irreducible": round(float(resid90[i]) * 1.8, 2),
+        "weather": round(float(1.645 * sigma_wx[i]) * 1.8, 2)}
+       for i, h in enumerate(horizons)]
 
 last = hourly_buoy.ffill().iloc[-1]
 out = {
@@ -119,18 +181,22 @@ out = {
     "history": history,
     "pastfc": pastfc,
     "daily": daily[:7],
+    "members": members_out,
+    "uncertainty": unc,
 }
 
-# fold the five-season backtest into the site stats when it exists
+# fold the multi-season backtest and driver study into the site stats so the
+# bottom charts can render interactively from data, not static images
+with open("models/qstats.json") as fh:
+    qs = json.load(fh)
 backtest_path = pathlib.Path("models/backtest.json")
 if backtest_path.exists():
-    with open(backtest_path) as fh:
-        bt = json.load(fh)
-    with open("models/qstats.json") as fh:
-        qs = json.load(fh)
-    qs["backtest"] = bt
-    with open("models/qstats.json", "w") as fh:
-        json.dump(qs, fh)
+    qs["backtest"] = json.load(open(backtest_path))
+driver_path = pathlib.Path("reports/correlations.json")
+if driver_path.exists():
+    qs["driver"] = json.load(open(driver_path))
+with open("models/qstats.json", "w") as fh:
+    json.dump(qs, fh)
 
 pathlib.Path("site/reports").mkdir(parents=True, exist_ok=True)
 for png in ["model_comparison.png", "error_analysis.png", "correlations.png", "backtest.png"]:

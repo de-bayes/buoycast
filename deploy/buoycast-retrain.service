@@ -1,0 +1,12 @@
+[Unit]
+Description=buoycast weekly full retrain and recalibration
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=buoycast
+WorkingDirectory=/opt/buoycast
+ExecStart=/bin/bash -c 'set -e; V=/opt/buoycast/venv/bin/python; $V fetch.py; $V fetch_weather.py; $V train_q.py --refit-full; $V backtest.py; $V corr.py; $V publish.py'
+TimeoutStartSec=7200
+Nice=15

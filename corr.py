@@ -56,6 +56,16 @@ sweep = {
     "N-S wind": [r(df["v"].rolling(w).mean().shift(-w)) for w in windows],
 }
 
+# export the underlying numbers so the site can draw this interactively
+import json
+with open("reports/correlations.json", "w") as fh:
+    json.dump({
+        "drivers": [{"name": n, "past": round(p, 4), "future": round(f, 4)} for n, p, f in rows],
+        "windows": windows,
+        "sweep": {k: [round(v, 4) for v in vs] for k, vs in sweep.items()},
+    }, fh)
+print("wrote reports/correlations.json")
+
 plt.style.use("dark_background")
 BG, PANEL, INK, CYAN, FAINT, YEL = "#0a0c0e", "#101418", "#cfdce8", "#39c2ff", "#5d7283", "#ffd23e"
 fig, axes = plt.subplots(1, 2, figsize=(13.5, 5.6), facecolor=BG)
