@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=5">
+  <link rel="stylesheet" href="/style.css?v=6">
   <meta name="theme-color" content="#ffffff">
 </head>
 <body>
@@ -17,7 +17,7 @@
       <a class="nav__brand" href="/">Buoycast</a>
       <nav class="pill">
         <a href="/" aria-current="page">Forecast</a>
-        <a href="/ml">How the model works</a>
+        <a href="/ml">ML explainer</a>
       </nav>
     </div>
   </header>
@@ -25,28 +25,26 @@
   <main>
     <div class="wrap">
       <section class="hero reveal">
-        <p class="hero__kicker">In the water now &middot; Wilmette buoy 45174</p>
-        <p class="hero__big" id="now-wtmp">--</p>
-        <p class="hero__lede">A probabilistic forecast of Lake Michigan surface temperature off the Evanston shoreline, hour by hour to seven days. Every number below is anchored to this live reading, with an honest band around it.</p>
-        <div class="hero__now" id="now-grid"></div>
+        <p class="hero__kicker">Evanston&ndash;Wilmette lakefront &middot; Wilmette buoy 45174 &middot; live</p>
+        <h1 class="hero__title">The next 168 hours</h1>
+        <p class="hero__lede">Lake Michigan surface temperature, forecast hour by hour to seven days. The dark line is the median of 34 simulated futures; the band around it is calibrated on nine seasons of out-of-sample misses, so it means what it says.</p>
+        <div class="figure">
+          <p class="subhead">Hourly forecast &middot; P5 / P25 / P50 / P75 / P95</p>
+          <canvas id="fan" height="380"></canvas>
+        </div>
+        <p class="caption">Hover anywhere for the exact numbers at that hour. The faint plume is the forecast run 34 times: once on each of the 31 members of NOAA's GEFS ensemble (the same model nudged 31 ways to sample the atmosphere's chaos) plus the European, German, and Canadian models for diversity. The band combines the model's own error with how much those 34 futures disagree: tight when they agree, wide only when they genuinely diverge. The inner band should hold the outcome half the time, the outer band 90 percent of the time.</p>
       </section>
-    </div>
-
-    <div class="wrap">
-      <section class="chips reveal" id="chips"></section>
     </div>
 
     <div class="wrap">
       <section class="section section--first reveal">
         <div class="section__head">
           <span class="section__num">01</span>
-          <h2 class="section__title">The next 168 hours, with a band</h2>
+          <h2 class="section__title">In the water right now</h2>
         </div>
-        <div class="figure">
-          <p class="subhead">Hourly forecast &middot; P5 / P25 / P50 / P75 / P95</p>
-          <canvas id="fan" height="360"></canvas>
-        </div>
-        <p class="caption">Hover anywhere for the exact numbers at that hour. The faint plume is the forecast run 34 times: once on each of the 31 members of NOAA's GEFS ensemble (the same model nudged 31 ways to sample the atmosphere's chaos) plus the European, German, and Canadian models for diversity. The band combines the model's own error, conformally calibrated on nine seasons of out-of-sample misses, with how much those 34 futures disagree: tight when they agree, wide only when they genuinely diverge. The inner band should hold the outcome half the time, the outer band 90 percent of the time.</p>
+        <p class="now__big" id="now-wtmp">--</p>
+        <div class="hero__now" id="now-grid"></div>
+        <p class="caption">Observed by the buoy, ten-minute cadence in season. Every forecast above starts from this reading: the model is pinned to reality at hour one and earns its keep from there.</p>
       </section>
 
       <section class="section reveal">
@@ -58,6 +56,13 @@
           <div class="digest" id="digest"></div>
         </div>
       </section>
+    </div>
+
+    <div class="wrap">
+      <section class="chips reveal" id="chips"></section>
+    </div>
+
+    <div class="wrap">
 
       <section class="section reveal">
         <div class="section__head">
@@ -180,7 +185,7 @@
       <p>Open data: NOAA NDBC, ERA5 (Copernicus), GFS/HRRR via Open-Meteo. The buoy is seasonal, roughly May to November. Not an official product; for safety decisions use NWS Chicago. <span id="stamp">loading&hellip;</span></p>
       <nav class="foot__nav">
         <a href="/">Forecast</a>
-        <a href="/ml">How the model works</a>
+        <a href="/ml">ML explainer</a>
       </nav>
     </div>
   </footer>

@@ -160,6 +160,28 @@ b, td, th, .count, .hero__big {
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
+.hero__title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(2.6rem, 6vw, 3.9rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0;
+}
+.hero .figure { margin-top: clamp(2rem, 5vw, 3.2rem); }
+
+/* the live reading, demoted from hero to its own numbered section */
+.now__big {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(3rem, 7vw, 4.2rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 0.4rem;
+  font-variant-numeric: tabular-nums;
+}
 .hero__lede {
   font-size: clamp(1.05rem, 2vw, 1.22rem);
   line-height: 1.6;
