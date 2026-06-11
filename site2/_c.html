@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buoycast — Machine learning for one square of Lake Michigan</title>
+  <meta name="description" content="A machine-learning water-temperature forecaster for the Evanston-Wilmette shoreline of Lake Michigan, NDBC buoy 45174. Hourly probabilistic forecasts to seven days, calibrated on nine replayed seasons.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style2.css?v=2">
+  <meta name="theme-color" content="#060709">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23060709'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%2336c6d9'/%3E%3C/svg%3E">
+<style>.reveal{opacity:1!important;transform:none!important}</style></head>
+<body>
+
+  <!-- 1. NAV -->
+  <header class="nav" id="nav">
+    <a class="nav__brand" href="#top">
+      <span class="nav__mark" aria-hidden="true"></span>
+      <span class="nav__word">BUOYCAST</span>
+    </a>
+    <nav class="nav__links">
+      <a href="https://buoycast.vercel.app" target="_blank" rel="noopener">Live forecast</a>
+      <a href="https://buoycast.vercel.app/ml" target="_blank" rel="noopener">ML explainer</a>
+    </nav>
+  </header>
+
+  <main id="top">
+
+    <!-- 2. HERO -->
+    <section class="hero" style="display:none">
+      <div class="hero__art" aria-hidden="true"></div>
+      <div class="hero__scrim" aria-hidden="true"></div>
+      <div class="hero__inner">
+        <p class="hero__kicker mono">BUOYCAST · MACHINE LEARNING FOR ONE SQUARE OF LAKE MICHIGAN</p>
+        <h1 class="hero__title">The lake,<br>forecast.</h1>
+        <p class="hero__lede">Hourly water-temperature forecasts to seven days for a single point off the
+          Evanston-Wilmette shoreline, learned from nine seasons of buoy readings, reanalysis, and the
+          world's weather models.</p>
+        <a class="pill" href="https://buoycast.vercel.app" target="_blank" rel="noopener">
+          See the live forecast <span class="pill__arr" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+      <p class="hero__coord mono">42.1380&deg; N&nbsp;&nbsp;87.6553&deg; W · WILMETTE BUOY 45174 · FIELD: NASA MUR SST 2026-06-10</p>
+      <div class="hero__legend mono" aria-hidden="true"><span>18.9</span><span class="hero__legend-bar"></span><span>23.1 &deg;C SURFACE</span></div>
+    </section>
+
+    <!-- 3. LIVE STRIP -->
+    <section class="strip reveal" id="live">
+      <div class="strip__head">
+        <span class="strip__label mono">LIVE · NDBC 45174</span>
+        <span class="strip__meta mono" id="live-updated">reading the buoy&hellip;</span>
+      </div>
+      <div class="strip__grid" id="live-grid">
+        <div class="stat stat--hero">
+          <p class="stat__k mono">WATER NOW</p>
+          <p class="stat__v" id="s-water">&mdash;</p>
+          <p class="stat__u mono">&deg;F</p>
+        </div>
+        <div class="stat"><p class="stat__k mono">AIR</p><p class="stat__v" id="s-air">&mdash;</p><p class="stat__u mono">&deg;F</p></div>
+        <div class="stat"><p class="stat__k mono">WAVES</p><p class="stat__v" id="s-wave">&mdash;</p><p class="stat__u mono">FT</p></div>
+        <div class="stat"><p class="stat__k mono">WIND</p><p class="stat__v" id="s-wind">&mdash;</p><p class="stat__u mono">KT</p></div>
+        <div class="stat stat--fc">
+          <p class="stat__k mono">+24 H · MEDIAN</p>
+          <p class="stat__v" id="s-24">&mdash;</p>
+          <p class="stat__u mono" id="s-24band">&deg;F</p>
+        </div>
+        <div class="stat stat--fc">
+          <p class="stat__k mono">+168 H · MEDIAN</p>
+          <p class="stat__v" id="s-168">&mdash;</p>
+          <p class="stat__u mono" id="s-168band">&deg;F</p>
+        </div>
+      </div>
+      <p class="strip__note mono" id="live-note" hidden>LIVE FEED UNREACHABLE · SHOWING LAST KNOWN RANGE</p>
+    </section>
+
+    <!-- 4. FAN CHART -->
+    <section class="fan reveal" id="fan">
+      <div class="sec__head">
+        <span class="sec__num mono">FIG 01</span>
+        <h2 class="sec__title">The next 168 hours</h2>
+      </div>
+      <p class="sec__lede">Thirty-four simulated futures, drawn faint. The bright line is their median;
+        the bands are calibrated on nine replayed seasons, so ninety percent means at least ninety percent.</p>
+      <div class="fan__wrap">
+        <canvas id="fanCanvas"></canvas>
+        <div class="fan__legend mono">
+          <span><i class="lg lg--p90"></i>90% band</span>
+          <span><i class="lg lg--p50band"></i>50% band</span>
+          <span><i class="lg lg--med"></i>median</span>
+          <span><i class="lg lg--mem"></i>34 members</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. GRID COLLAGE -->
+    <section class="collage reveal" id="collage">
+      <div class="cell cell--img">
+        <img src="/assets/locator.png" alt="Close-up of the Evanston-Wilmette shoreline temperature field with the buoy marked">
+        <p class="cell__cap mono">WHERE IT SITS · 1.2 KM OFFSHORE</p>
+      </div>
+      <div class="cell cell--coord">
+        <p class="mono cell__big">42.1380&deg; N</p>
+        <p class="mono cell__big">87.6553&deg; W</p>
+        <p class="mono cell__sub">&darr; WILMETTE BUOY 45174</p>
+      </div>
+      <div class="cell cell--stat">
+        <p class="cell__num">10<span class="cell__numu">min</span></p>
+        <p class="cell__lab mono">REFRESHED, EVERY TEN MINUTES IN SEASON</p>
+      </div>
+      <div class="cell cell--stat">
+        <p class="cell__num">131,745</p>
+        <p class="cell__lab mono">VERIFIED OUT-OF-SAMPLE FORECASTS</p>
+      </div>
+      <div class="cell cell--arrow">
+        <p class="mono cell__sub">AIR &rarr; WATER · WIND &rarr; WATER</p>
+        <p class="cell__num cell__num--sm">46</p>
+        <p class="cell__lab mono">FEATURES PER HOUR</p>
+      </div>
+      <div class="cell cell--stat">
+        <p class="cell__num">9</p>
+        <p class="cell__lab mono">SEASONS REPLAYED, 2016&ndash;2026</p>
+      </div>
+      <div class="cell cell--stat cell--accent">
+        <p class="cell__num">x2</p>
+        <p class="cell__lab mono">VS PERSISTENCE AT SEVEN DAYS</p>
+      </div>
+      <div class="cell cell--stat">
+        <p class="cell__num">$0<span class="cell__numu">/mo</span></p>
+        <p class="cell__lab mono">INFRASTRUCTURE · ONE FREE VM</p>
+      </div>
+    </section>
+
+    <!-- 6. BIG STAT MOMENT -->
+    <section class="moment reveal" id="moment">
+      <div class="moment__ring" aria-hidden="true">
+        <span class="moment__giant">x2</span>
+      </div>
+      <p class="moment__cap">More accurate than assuming no change,<br>
+        seven days out, proven across nine replayed seasons.</p>
+    </section>
+
+    <!-- 7. HONESTY -->
+    <section class="honesty reveal" id="honesty">
+      <div class="sec__head">
+        <span class="sec__num mono">ON BEING WRONG</span>
+        <h2 class="sec__title">How far off it usually is</h2>
+      </div>
+      <div class="honesty__body">
+        <p class="honesty__lede">
+          A day ahead, the forecast is typically off by
+          <span class="hl">0.83 &deg;F</span>. A week ahead, by
+          <span class="hl">1.53 &deg;F</span>. The band around the median is calibrated on nine
+          seasons of out-of-sample misses, so when it says ninety percent it holds the real
+          reading at least ninety percent of the time, not less.
+        </p>
+        <div class="honesty__links">
+          <a class="link" href="https://buoycast.vercel.app/reports/accuracy_report.pdf" target="_blank" rel="noopener">
+            Read the accuracy report <span aria-hidden="true">&rarr;</span>
+          </a>
+          <a class="link" href="https://buoycast.vercel.app/ml" target="_blank" rel="noopener">
+            How the model works <span aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. FOOTER -->
+    <footer class="foot">
+      <div class="foot__row">
+        <div>
+          <p class="foot__brand"><span class="nav__mark" aria-hidden="true"></span> BUOYCAST</p>
+          <p class="foot__by">Built by <a href="https://mccomb.ca" target="_blank" rel="noopener">Ryan McComb</a></p>
+        </div>
+        <div class="foot__credits mono">
+          <p>DATA · NASA MUR SST via NOAA CoastWatch</p>
+          <p>NDBC 45174 · ERA5 reanalysis · Open-Meteo forecast</p>
+        </div>
+      </div>
+      <p class="foot__coord mono">42.1380&deg; N&nbsp;&nbsp;87.6553&deg; W · LAKE MICHIGAN · SOUTHERN BASIN</p>
+    </footer>
+
+  </main>
+
+  <script src="/app2.js?v=2"></script>
+</body>
+</html>

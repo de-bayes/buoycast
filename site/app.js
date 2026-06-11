@@ -178,12 +178,14 @@
       chips.splice(4, 0, ['BACKTESTED PAIRS', (stats.backtest.total_pairs / 1000).toFixed(0) + 'k']);
     }
     var cwrap = document.getElementById('chips');
-    chips.forEach(function (c) {
-      var d = document.createElement('div');
-      d.className = 'chip';
-      d.innerHTML = '<span>' + c[0] + '</span><b>' + c[1] + '</b>';
-      cwrap.appendChild(d);
-    });
+    if (cwrap) {
+      chips.forEach(function (c) {
+        var d = document.createElement('div');
+        d.className = 'chip';
+        d.innerHTML = '<span>' + c[0] + '</span><b>' + c[1] + '</b>';
+        cwrap.appendChild(d);
+      });
+    }
 
     /* now card */
     document.getElementById('now-wtmp').textContent = data.now.wtmp_f.toFixed(1) + '°F';

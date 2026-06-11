@@ -115,7 +115,7 @@ body {
   position: absolute;
   top: 5px; bottom: 5px; left: 0;
   width: 0;
-  background: #f2f1ef;
+  background: #f1f1f1;
   border-radius: 9px;
   transition: transform 0.24s cubic-bezier(0.3, 0.9, 0.35, 1),
               width 0.24s cubic-bezier(0.3, 0.9, 0.35, 1);
@@ -289,6 +289,82 @@ b, td, th, .count, .hero__big {
 }
 
 canvas { width: 100%; display: block; }
+
+
+/* =========================================================
+   The station: editorial stat grid (hairline collage)
+   ========================================================= */
+.station__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+}
+.cell {
+  background: var(--bg);
+  padding: 1.6rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 170px;
+}
+.cell__big {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(2rem, 3.6vw, 2.9rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 0.55rem;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.cell__big small {
+  font-size: 0.45em;
+  font-weight: 500;
+  color: var(--muted);
+  margin-left: 0.15em;
+  letter-spacing: 0;
+}
+.cell__label, .cell__kicker {
+  font-family: var(--serif);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  line-height: 1.5;
+}
+.cell__kicker { margin-bottom: auto; padding-bottom: 1.2rem; }
+.cell--map {
+  margin: 0;
+  padding: 0;
+  position: relative;
+  grid-column: span 2;
+  grid-row: span 2;
+  min-height: 340px;
+  overflow: hidden;
+}
+.cell--map img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cell--map figcaption {
+  position: absolute; left: 1.5rem; bottom: 1.2rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+.cell--coords { grid-column: span 2; }
+
+@media (max-width: 720px) {
+  .station__grid { grid-template-columns: repeat(2, 1fr); }
+  .cell { min-height: 130px; padding: 1.2rem 1.1rem 1.1rem; }
+  .cell--map { grid-column: span 2; grid-row: span 1; min-height: 240px; }
+  .cell--coords { grid-column: span 2; }
+}
 
 /* stat strip */
 .chips {

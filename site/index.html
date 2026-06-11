@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=7">
+  <link rel="stylesheet" href="/style.css?v=8">
   <meta name="theme-color" content="#ffffff">
 </head>
 <body>
@@ -59,7 +59,43 @@
     </div>
 
     <div class="wrap">
-      <section class="chips reveal" id="chips"></section>
+      <section class="station reveal" aria-label="The station at a glance">
+        <div class="station__grid">
+          <figure class="cell cell--map">
+            <img src="/assets/locator.png" alt="Satellite surface-temperature field around the buoy, the station marked with a white ring">
+            <figcaption>Where it sits &middot; 2.2 km offshore &middot; NASA MUR SST</figcaption>
+          </figure>
+          <div class="cell cell--coords">
+            <p class="cell__big">42.1380&deg;&nbsp;N<br>87.6553&deg;&nbsp;W</p>
+            <span class="cell__label">&darr; Wilmette buoy 45174 &middot; depth 14.3 m</span>
+          </div>
+          <div class="cell">
+            <p class="cell__big">10<small>min</small></p>
+            <span class="cell__label">Refreshed, every ten minutes in season</span>
+          </div>
+          <div class="cell">
+            <p class="cell__big">131,745</p>
+            <span class="cell__label">Verified out-of-sample forecasts</span>
+          </div>
+          <div class="cell">
+            <span class="cell__kicker">air &rarr; water &middot; wind &rarr; water</span>
+            <p class="cell__big">46</p>
+            <span class="cell__label">Features per hour</span>
+          </div>
+          <div class="cell">
+            <p class="cell__big">9</p>
+            <span class="cell__label">Seasons replayed, 2018&ndash;2026</span>
+          </div>
+          <div class="cell">
+            <p class="cell__big">x2</p>
+            <span class="cell__label">vs persistence at seven days</span>
+          </div>
+          <div class="cell">
+            <p class="cell__big">$0<small>/mo</small></p>
+            <span class="cell__label">Infrastructure &middot; one free VM</span>
+          </div>
+        </div>
+      </section>
     </div>
 
     <div class="wrap">
@@ -211,6 +247,6 @@
     })();
   </script>
   <script src="/nav.js?v=1"></script>
-  <script src="/app.js?v=5"></script>
+  <script src="/app.js?v=6"></script>
 </body>
 </html>
