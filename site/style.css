@@ -245,6 +245,19 @@ b, td, th, .count, .hero__big {
 }
 .section__title + .caption { margin-top: 0.9rem; }
 
+/* sub-blocks within a single numbered section (e.g. "Under the hood") */
+.block { margin-top: clamp(2.6rem, 5vw, 3.8rem); }
+.block:first-of-type { margin-top: 0; }
+.block__title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0 0 1.3rem;
+}
+
 /* figure caption: muted, paper-like, narrow measure */
 .caption {
   font-size: 0.9rem;
@@ -437,6 +450,9 @@ canvas { width: 100%; display: block; }
 }
 .foot__inner a { color: var(--accent); text-decoration: none; }
 .foot__inner a:hover { text-decoration: underline; }
+.foot__credit { display: inline-block; margin-top: 0.7rem; color: var(--faint); }
+.foot__credit a { color: var(--faint); }
+.foot__credit a:hover { color: var(--accent); text-decoration: none; }
 .foot__nav {
   display: flex;
   flex-direction: column;

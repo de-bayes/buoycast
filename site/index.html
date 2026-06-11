@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=6">
+  <link rel="stylesheet" href="/style.css?v=7">
   <meta name="theme-color" content="#ffffff">
 </head>
 <body>
@@ -32,7 +32,7 @@
           <p class="subhead">Hourly forecast &middot; P5 / P25 / P50 / P75 / P95</p>
           <canvas id="fan" height="380"></canvas>
         </div>
-        <p class="caption">Hover anywhere for the exact numbers at that hour. The faint plume is the forecast run 34 times: once on each of the 31 members of NOAA's GEFS ensemble (the same model nudged 31 ways to sample the atmosphere's chaos) plus the European, German, and Canadian models for diversity. The band combines the model's own error with how much those 34 futures disagree: tight when they agree, wide only when they genuinely diverge. The inner band should hold the outcome half the time, the outer band 90 percent of the time.</p>
+        <p class="caption">Hover anywhere for the exact numbers at that hour. The faint plume is the forecast run across 34 weather futures (NOAA's 31-member GEFS ensemble plus the European, German, and Canadian models); the band, calibrated on nine seasons, widens only when those futures genuinely disagree. The inner band should hold the outcome half the time, the outer band 90 percent of the time.</p>
       </section>
     </div>
 
@@ -102,40 +102,39 @@
       <section class="section reveal">
         <div class="section__head">
           <span class="section__num">06</span>
-          <h2 class="section__title">Error structure at +24h</h2>
+          <h2 class="section__title">Under the hood</h2>
+          <p class="caption caption--tight">The held-out test set examined three ways: where the +24h errors fall, which inputs the model leans on, and the full table of numbers behind every claim above.</p>
         </div>
-        <div class="duo">
-          <div><h3>Residual distribution (&deg;F)</h3><canvas id="residuals" height="240"></canvas></div>
-          <div><h3>Predicted vs actual (&deg;F)</h3><canvas id="scatter" height="240"></canvas></div>
+
+        <div class="block">
+          <h3 class="block__title">Error structure at +24h</h3>
+          <div class="duo">
+            <div><h3>Residual distribution (&deg;F)</h3><canvas id="residuals" height="240"></canvas></div>
+            <div><h3>Predicted vs actual (&deg;F)</h3><canvas id="scatter" height="240"></canvas></div>
+          </div>
+        </div>
+
+        <div class="block">
+          <h3 class="block__title">What the model leans on</h3>
+          <div class="figure">
+            <p class="subhead">Permutation importance, test set</p>
+            <canvas id="importance" height="280"></canvas>
+          </div>
+          <p class="caption">Increase in error when a feature is shuffled (&deg;F). The current water temperature and its recent lags anchor the level; forecast-window air temperature, wind, and solar move it. The fut_ features come from the weather forecast, the rest from the buoy itself.</p>
+        </div>
+
+        <div class="block">
+          <h3 class="block__title">Full validation table</h3>
+          <div class="figure">
+            <div class="tablewrap"><table id="stat-table"></table></div>
+          </div>
+          <p class="caption">All numbers in &deg;F on the gap-separated test window. Bias is mean signed error. P90 |err| is the 90th percentile of absolute error, the bad-day number. Width is the average 90 percent band span.</p>
         </div>
       </section>
 
       <section class="section reveal">
         <div class="section__head">
           <span class="section__num">07</span>
-          <h2 class="section__title">What the model leans on</h2>
-        </div>
-        <div class="figure">
-          <p class="subhead">Permutation importance, test set</p>
-          <canvas id="importance" height="280"></canvas>
-        </div>
-        <p class="caption">Increase in error when a feature is shuffled (&deg;F). The current water temperature and its recent lags anchor the level; forecast-window air temperature, wind, and solar move it. The fut_ features come from the weather forecast, the rest from the buoy itself.</p>
-      </section>
-
-      <section class="section reveal">
-        <div class="section__head">
-          <span class="section__num">08</span>
-          <h2 class="section__title">Full validation table</h2>
-        </div>
-        <div class="figure">
-          <div class="tablewrap"><table id="stat-table"></table></div>
-        </div>
-        <p class="caption">All numbers in &deg;F on the gap-separated test window. Bias is mean signed error. P90 |err| is the 90th percentile of absolute error, the bad-day number. Width is the average 90 percent band span.</p>
-      </section>
-
-      <section class="section reveal">
-        <div class="section__head">
-          <span class="section__num">09</span>
           <h2 class="section__title">Why it works: the driver study</h2>
           <p class="caption caption--tight">Hover either panel. Weather during the forecast window (cyan) carries two to four times the signal of the buoy's own past (gray): air-water temperature gap, sustained wind (mixing), solar input, and the alongshore wind that drives upwelling. The longer the window, the stronger the correlation: it is sustained conditions, not snapshots, that move the water.</p>
         </div>
@@ -147,7 +146,7 @@
 
       <section class="section reveal">
         <div class="section__head">
-          <span class="section__num">10</span>
+          <span class="section__num">08</span>
           <h2 class="section__title">Anatomy of the uncertainty</h2>
         </div>
         <div class="figure">
@@ -159,7 +158,7 @@
 
       <section class="section reveal">
         <div class="section__head">
-          <span class="section__num">11</span>
+          <span class="section__num">09</span>
           <h2 class="section__title">Methodology</h2>
         </div>
         <div class="method">
@@ -182,7 +181,7 @@
 
   <footer class="foot">
     <div class="foot__inner">
-      <p>Open data: NOAA NDBC, ERA5 (Copernicus), GFS/HRRR via Open-Meteo. The buoy is seasonal, roughly May to November. Not an official product; for safety decisions use NWS Chicago. <span id="stamp">loading&hellip;</span></p>
+      <p>Open data: NOAA NDBC, ERA5 (Copernicus), GFS/HRRR via Open-Meteo. The buoy is seasonal, roughly May to November. Not an official product; for safety decisions use NWS Chicago. <span id="stamp">loading&hellip;</span><br><span class="foot__credit">Built by <a href="https://mccomb.ca">Ryan McComb</a></span></p>
       <nav class="foot__nav">
         <a href="/">Forecast</a>
         <a href="/ml">ML explainer</a>
