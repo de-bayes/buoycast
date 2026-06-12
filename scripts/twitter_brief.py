@@ -41,13 +41,16 @@ pdf = PdfPages("reports/buoycast_brief.pdf")
 # ---------------------------------------------------------------- page 1
 fig = plt.figure(figsize=A4)
 logo = np.array(Image.open("/tmp/logo_print.png"))
-ax_logo = fig.add_axes([M, 0.875, 0.085, 0.085 * (8.27/11.69) * (640/512) * 1.42])
+ax_logo = fig.add_axes([1 - M - 0.095, 0.862, 0.095, 0.095 * (8.27/11.69) * (640/512) * 1.42])
 ax_logo.imshow(logo); ax_logo.axis("off")
-fig.text(M + 0.105, 0.935, "BUOYCAST", fontsize=10, weight="bold", color=ACCENT)
-fig.text(M + 0.105, 0.905, "A machine-learning forecast for Lake Michigan\nwater temperature", fontsize=16, weight="bold", va="top", linespacing=1.25)
-fig.add_artist(plt.Line2D([M, 1-M], [0.852, 0.852], color=RULE, lw=0.8, transform=fig.transFigure))
-fig.text(M, 0.838, "Ryan McComb · June 2026 · buoy 45174, Evanston-Wilmette shoreline · not live yet, in final testing",
-         fontsize=8, color=MUTED)
+fig.text(M, 0.952, "BUOYCAST · A SHORT BRIEF", fontsize=7.5, color=ACCENT,
+         weight="bold", family="serif")
+fig.text(M, 0.922, "A machine-learning forecast for\nLake Michigan water temperature", fontsize=18.5,
+         weight="bold", va="top", linespacing=1.22)
+fig.text(M, 0.862, "Ryan McComb · June 2026 · NDBC buoy 45174, Evanston-Wilmette shoreline",
+         fontsize=8.5, color=MUTED)
+fig.text(M, 0.845, "Status: not live yet, in final testing", fontsize=8.5, color=MUTED, style="italic")
+fig.add_artist(plt.Line2D([M, 1-M], [0.832, 0.832], color=RULE, lw=0.8, transform=fig.transFigure))
 
 body1 = (
     "Two kilometres off the Wilmette shore there is a NOAA buoy that reports the water "
@@ -65,7 +68,7 @@ body1 = (
     "34 different weather-model futures, so the band widens exactly when the weather models "
     "genuinely disagree; and every forecast is pinned to the buoy's live reading at hour one."
 )
-fig.text(M, 0.812, body1, fontsize=9.6, va="top", linespacing=1.6, wrap=True)
+fig.text(M, 0.808, body1, fontsize=9.6, va="top", linespacing=1.6, wrap=True)
 
 # numbers strip
 stats_y = 0.50
@@ -103,7 +106,7 @@ pdf.savefig(fig); plt.close(fig)
 
 # ---------------------------------------------------------------- page 2
 fig = plt.figure(figsize=A4)
-fig.text(M, 0.945, "HOW GOOD IS IT, IN PLAIN NUMBERS", fontsize=8, color=ACCENT, weight="bold")
+fig.text(M, 0.945, "RESULTS ON HELD-OUT SEASONS", fontsize=7.5, color=ACCENT, weight="bold")
 fig.add_artist(plt.Line2D([M, 1-M], [0.935, 0.935], color=RULE, lw=0.8, transform=fig.transFigure))
 
 # the table, same numbers as the mccomb.ca/ml explainer
@@ -146,20 +149,26 @@ fig.text(M, 0.385,
          "is honesty rather than bravado: those are the days its uncertainty band visibly opens up.",
          fontsize=7.8, color=MUTED, va="top", linespacing=1.5, wrap=True)
 
-closing = (
-    "What happens next. The live version is in final testing: a dashboard that refreshes every ten "
-    "minutes against the buoy, retrains itself every Sunday, and runs on one small cloud VM and open "
-    "data end to end. It will be public soon.\n\n"
-    "Credit where it is due. None of these ideas are new; they are old, public ideas applied carefully. "
-    "The validation approach, replaying whole hidden seasons and grading the model cold, runs parallel to "
-    "the VoteHub 2026 midterm methodology, which is mainly the work of Zachary Donnini; most of what I "
-    "know about checking a forecast honestly comes from that write-up and from questions Zachary has "
-    "answered for me. Data: NOAA NDBC (the buoy), ERA5 reanalysis (Copernicus), and the GFS, ECMWF, ICON, "
-    "and GEM weather models via Open-Meteo, all open and free.\n\n"
-    "Stack: Python, scikit-learn, pandas; one HistGradientBoostingRegressor per quantile; conformal "
-    "calibration on pooled out-of-sample residuals; anchor-blended to the live observation."
-)
-fig.text(M, 0.30, closing, fontsize=9.2, va="top", linespacing=1.6, wrap=True)
+fig.text(M, 0.315, "WHAT HAPPENS NEXT", fontsize=7.5, color=ACCENT, weight="bold")
+fig.text(M, 0.300,
+    "The live version is in final testing: a dashboard that refreshes every ten minutes against the "
+    "buoy, retrains itself every Sunday, and runs on one small cloud VM and open data end to end. "
+    "It will be public soon.",
+    fontsize=9.2, va="top", linespacing=1.6, wrap=True)
+fig.text(M, 0.242, "CREDIT WHERE IT IS DUE", fontsize=7.5, color=ACCENT, weight="bold")
+fig.text(M, 0.227,
+    "None of these ideas are new; they are old, public ideas applied carefully. The validation "
+    "approach, replaying whole hidden seasons and grading the model cold, runs parallel to the "
+    "VoteHub 2026 midterm methodology, which is mainly the work of Zachary Donnini; most of what I "
+    "know about checking a forecast honestly comes from that write-up and from questions Zachary "
+    "has answered for me. Data: NOAA NDBC (the buoy), ERA5 reanalysis (Copernicus), and the GFS, "
+    "ECMWF, ICON, and GEM weather models via Open-Meteo, all open and free.",
+    fontsize=9.2, va="top", linespacing=1.6, wrap=True)
+fig.text(M, 0.118, "STACK", fontsize=7.5, color=ACCENT, weight="bold")
+fig.text(M, 0.103,
+    "Python, scikit-learn, pandas; one HistGradientBoostingRegressor per quantile; conformal "
+    "calibration on pooled out-of-sample residuals; anchor-blended to the live observation.",
+    fontsize=8.6, color=MUTED, va="top", linespacing=1.55, wrap=True)
 fig.text(M, 0.045, "Ryan McComb · mccomb.ca · June 2026", fontsize=8, color=MUTED)
 fig.text(1 - M, 0.045, "buoycast brief · page 2 of 2", fontsize=7, color=FAINT, ha="right")
 pdf.savefig(fig); plt.close(fig)
