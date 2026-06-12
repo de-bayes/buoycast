@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Buoycast mark: a Gaussian-hull buoy">
+  <title>Buoycast mark</title>
+
+  <!-- ============================================================
+       SIMPLIFIED MARK  -  survives at 24px
+       hull  = filled Gaussian with quantile bands (blue / yellow / red)
+       mast  = stubby capital Sigma tower
+       light = x-hat point-estimate dot
+       water = one wave chord
+       ============================================================ -->
+
+  <!-- HULL: Gaussian area, three quantile bands -->
+  <defs>
+    <clipPath id="bellMark">
+      <path d="M 78 392
+               C 116 392, 134 380, 156 332
+               C 182 274, 204 150, 256 150
+               C 308 150, 330 274, 356 332
+               C 378 380, 396 392, 434 392
+               Z"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#bellMark)">
+    <rect x="70" y="140" width="372" height="260" fill="#cdd9fb"/>
+    <rect x="196" y="140" width="120" height="260" fill="#ffd02e"/>
+    <rect x="242" y="140" width="28" height="260" fill="#e0312e"/>
+  </g>
+  <!-- bell outline + baseline -->
+  <path d="M 78 392
+           C 116 392, 134 380, 156 332
+           C 182 274, 204 150, 256 150
+           C 308 150, 330 274, 356 332
+           C 378 380, 396 392, 434 392"
+        fill="none" stroke="#1a1a1a" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+  <line x1="78" y1="392" x2="434" y2="392" stroke="#1a1a1a" stroke-width="14" stroke-linecap="round"/>
+
+  <!-- MAST: a stubby capital Sigma -->
+  <path d="M 300 150 L 218 150 L 256 100 L 218 50 L 300 50"
+        fill="none" stroke="#1a1a1a" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- LIGHT: x-hat dot on top -->
+  <path d="M 236 30 L 256 8 L 276 30"
+        fill="none" stroke="#1a1a1a" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- one waterline wave under the hull -->
+  <path d="M 56 430
+           C 106 408, 156 408, 206 430
+           S 306 452, 356 430
+           S 456 408, 472 422"
+        fill="none" stroke="#2456e6" stroke-width="14" stroke-linecap="round"/>
+</svg>

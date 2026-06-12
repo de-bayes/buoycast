@@ -1080,6 +1080,7 @@ canvas { width: 100%; display: block; }
   border-top: 1.5px solid var(--accent);
   transform: translateY(-0.75px);
 }
+.ms-ruler__label.is-faded { opacity: 0.12; transition: opacity 0.15s ease; }
 .ms-ruler__frac {
   position: absolute;
   right: 20px;
@@ -1088,6 +1089,9 @@ canvas { width: 100%; display: block; }
   font-family: var(--ms-mono);
   font-size: 9px;
   letter-spacing: 0.04em;
+  background: rgba(255,255,255,0.95);
+  padding: 1px 3px;
+  border-radius: 2px;
   color: var(--accent);
   white-space: nowrap;
 }

@@ -44,24 +44,66 @@
         return Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
       }
 
-      // place each label at the vertical fraction of its section's top in the doc
+      // place each label at the vertical fraction of its section's top in the
+      // doc, skipping hidden sections, then resolve collisions so every label
+      // sits on its own line with breathing room
+      var MIN_GAP = 15;
       function layout() {
-        var h = docHeight() - window.innerHeight;
         var total = docHeight();
+        var railH = rail.getBoundingClientRect().height;
+        if (railH < 50) return;  // rail hidden (narrow viewport); nothing to place
+        var placed = [];
         labelNodes.forEach(function (rec) {
-          var top = rec.el.getBoundingClientRect().top + window.scrollY;
+          var rect = rec.el.getBoundingClientRect();
+          var visible = rec.el.offsetParent !== null && rect.height > 2;
+          rec.node.style.display = visible ? '' : 'none';
+          if (!visible) return;
+          var top = rect.top + window.scrollY;
           var frac = total > 0 ? top / total : 0;
-          rec.node.style.top = (frac * 100) + '%';
+          placed.push({ rec: rec, px: frac * railH });
         });
+        // top-down pass: push collisions downward
+        for (var i = 1; i < placed.length; i++) {
+          if (placed[i].px < placed[i - 1].px + MIN_GAP) {
+            placed[i].px = placed[i - 1].px + MIN_GAP;
+          }
+        }
+        // clamp the tail inside the rail and resolve upward if needed
+        if (placed.length) {
+          var last = placed[placed.length - 1];
+          if (last.px > railH - 4) last.px = railH - 4;
+          for (var k = placed.length - 2; k >= 0; k--) {
+            if (placed[k].px > placed[k + 1].px - MIN_GAP) {
+              placed[k].px = placed[k + 1].px - MIN_GAP;
+            }
+          }
+        }
+        placed.forEach(function (p) { p.rec.node.style.top = p.px + 'px'; });
         update();
+      }
+
+      // sections can reveal late (the backtest card unhides once stats load);
+      // re-run layout when any registered section's hidden attribute flips
+      if ('MutationObserver' in window) {
+        var mo = new MutationObserver(function () { layout(); });
+        labelNodes.forEach(function (rec) {
+          mo.observe(rec.el, { attributes: true, attributeFilter: ['hidden', 'style', 'class'] });
+        });
       }
 
       function update() {
         var max = docHeight() - window.innerHeight;
         var frac = max > 0 ? window.scrollY / max : 0;
         if (frac < 0) frac = 0; if (frac > 1) frac = 1;
-        cursor.style.top = (frac * 100) + '%';
+        var railH = rail.getBoundingClientRect().height;
+        var cursorPx = frac * railH;
+        cursor.style.top = cursorPx + 'px';
         fracEl.textContent = frac.toFixed(2);
+        labelNodes.forEach(function (rec) {
+          if (rec.node.style.display === 'none') return;
+          var lp = parseFloat(rec.node.style.top) || 0;
+          rec.node.classList.toggle('is-faded', Math.abs(lp - cursorPx) < 13);
+        });
         // highlight the label whose section is current
         var mid = window.scrollY + window.innerHeight * 0.33;
         var activeIdx = 0;

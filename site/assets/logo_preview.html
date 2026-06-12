@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buoycast logo preview</title>
+<style>
+  :root { --ink:#1a1a1a; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #ffffff;
+  }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+  .sub { color: #666; font-size: 13px; margin: 0 0 28px; }
+  section { padding: 36px 40px; border-bottom: 1px solid #ececec; }
+  h2 { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #888; margin: 0 0 20px; font-weight: 600; }
+  .row { display: flex; gap: 40px; align-items: flex-end; flex-wrap: wrap; }
+  .cand { text-align: center; }
+  .cand img { display: block; }
+  .cap { font-size: 12px; color: #555; margin-top: 12px; }
+  .cap b { color: var(--ink); }
+  .sizes { display: flex; gap: 44px; align-items: flex-end; }
+  .size { text-align: center; }
+  .size .n { font-size: 11px; color: #888; margin-top: 10px; }
+  .onwhite, .ondark { display: inline-flex; flex-direction: column; align-items: center; padding: 28px 36px; border-radius: 14px; }
+  .onwhite { background: #ffffff; border: 1px solid #e6e6e6; }
+  .ondark { background: #060709; }
+  .ondark .lbl { color: #888; }
+  .lbl { font-size: 11px; margin-top: 16px; color: #888; }
+  .swatches { display: flex; gap: 10px; margin-top: 8px; }
+  .sw { width: 30px; height: 30px; border-radius: 6px; border: 1px solid rgba(0,0,0,.12); }
+</style>
+</head>
+<body>
+
+  <section style="border-bottom:1px solid #ececec;">
+    <h1>Buoycast &mdash; logo exploration</h1>
+    <p class="sub">A buoy assembled entirely from statistical and mathematical symbols. Flat technical-manual palette.</p>
+    <div class="swatches">
+      <div class="sw" style="background:#1a1a1a" title="#1a1a1a ink"></div>
+      <div class="sw" style="background:#e0312e" title="#e0312e red"></div>
+      <div class="sw" style="background:#2456e6" title="#2456e6 blue"></div>
+      <div class="sw" style="background:#ffd02e" title="#ffd02e yellow"></div>
+      <div class="sw" style="background:#00a05a" title="#00a05a green"></div>
+      <div class="sw" style="background:#ff5c8a" title="#ff5c8a pink"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Three candidates</h2>
+    <div class="row">
+      <div class="cand">
+        <img src="logo_a.svg" width="240" height="300" alt="Logo A">
+        <div class="cap"><b>A &mdash; geometric / minimal.</b> Sigma mast, Gaussian hull, x-hat light.</div>
+      </div>
+      <div class="cand">
+        <img src="logo_b.svg" width="240" height="300" alt="Logo B">
+        <div class="cap"><b>B &mdash; composite showpiece (WINNER).</b> Discus buoy, integral-lattice tower.</div>
+      </div>
+      <div class="cand">
+        <img src="logo_c.svg" width="240" height="300" alt="Logo C">
+        <div class="cap"><b>C &mdash; playful.</b> Box-plot can buoy, epsilon beacon, half-Gaussian float.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Final logo</h2>
+    <div class="row" style="align-items:stretch;">
+      <div class="onwhite">
+        <img src="logo.svg" width="280" height="350" alt="Final on white">
+        <div class="lbl">on #ffffff</div>
+      </div>
+      <div class="ondark">
+        <img src="logo.svg" width="280" height="350" alt="Final on dark">
+        <div class="lbl">on #060709</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Mark &mdash; small sizes</h2>
+    <div class="sizes">
+      <div class="size"><img src="logo_mark.svg" width="24" height="24" alt="24px"><div class="n">24px</div></div>
+      <div class="size"><img src="logo_mark.svg" width="48" height="48" alt="48px"><div class="n">48px</div></div>
+      <div class="size"><img src="logo_mark.svg" width="96" height="96" alt="96px"><div class="n">96px</div></div>
+    </div>
+    <div class="row" style="margin-top:34px; align-items:stretch;">
+      <div class="onwhite">
+        <img src="logo_mark.svg" width="120" height="120" alt="Mark on white">
+        <div class="lbl">mark on #ffffff</div>
+      </div>
+      <div class="ondark">
+        <img src="logo_mark.svg" width="120" height="120" alt="Mark on dark">
+        <div class="lbl">mark on #060709</div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

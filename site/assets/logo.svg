@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 640" width="512" height="640" role="img" aria-label="Buoycast logo: an NDBC discus buoy assembled from statistical symbols">
-  <title>Buoycast - composite showpiece</title>
+  <title>Buoycast</title>
 
   <!-- ============================================================
-       LOGO B  -  rich composite (NDBC discus buoy)
+       BUOYCAST LOGO  -  NDBC discus buoy built from statistics
        hull   = Gaussian area with P5/P50/P95 quantile bands
        mast   = lattice tower built of integral signs + summation
        cross  = error-bar spars (whiskers with caps)
