@@ -1,139 +1,109 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 640" width="512" height="640" role="img" aria-label="Buoycast logo: an NDBC discus buoy assembled from statistical symbols">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 640" width="512" height="640" role="img" aria-label="Buoycast logo: a buoy built from statistical symbols">
   <title>Buoycast</title>
 
   <!-- ============================================================
-       BUOYCAST LOGO  -  NDBC discus buoy built from statistics
-       hull   = Gaussian area with P5/P50/P95 quantile bands
-       mast   = lattice tower built of integral signs + summation
-       cross  = error-bar spars (whiskers with caps)
-       light  = x-hat point estimate + epsilon halo
-       water  = overlapping sine / distribution tails
-       extras = residual scatter, mu axis, box-plot foot
-       palette: ink 1a1a1a, red e0312e, blue 2456e6,
-                yellow ffd02e, green 00a05a, pink ff5c8a
+       BUOYCAST LOGO  -  official mark
+       hull  = filled Gaussian (normal distribution) area
+       mast  = tapered lattice tower; the diagonal bracing is a sigma
+       light = point estimate dot with circumflex (x-hat)
+       water = single cosine waterline
        ============================================================ -->
 
-  <!-- =============== WATER: overlapping sine tails =============== -->
-  <path d="M 20 506
-           C 70 474, 120 474, 170 506
-           S 270 538, 320 506
-           S 420 474, 470 506
-           S 540 538, 560 506"
-        fill="none" stroke="#2456e6" stroke-width="10" stroke-linecap="round"/>
-  <path d="M 20 540
-           C 78 514, 136 514, 194 540
-           S 310 566, 368 540
-           S 484 514, 542 540"
-        fill="none" stroke="#2456e6" stroke-width="7" stroke-linecap="round" opacity="0.4"/>
-  <path d="M 44 478
-           C 92 458, 140 458, 188 478"
-        fill="none" stroke="#00a05a" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
+  <!-- palette -->
+  <!-- ink #1a1a1a  red #e0312e  blue #2456e6  yellow #ffd02e  green #00a05a -->
 
-  <!-- =============== HULL: Gaussian area, quantile bands =============== -->
-  <!-- A wide shallow discus. Top edge = bell curve, base = waterline chord. -->
+  <g fill="none" stroke="#1a1a1a" stroke-width="0" >
+
+  <!-- ========== WATERLINE: a cosine curve ========== -->
+  <path d="M 36 470
+           C 76 442, 116 442, 156 470
+           S 236 498, 276 470
+           S 356 442, 396 470
+           S 476 498, 512 470"
+        fill="none" stroke="#2456e6" stroke-width="9" stroke-linecap="round"/>
+  <path d="M 36 502
+           C 84 480, 132 480, 180 502
+           S 276 524, 324 502
+           S 420 480, 468 502"
+        fill="none" stroke="#2456e6" stroke-width="6" stroke-linecap="round" opacity="0.45"/>
+
+  </g>
+
+  <!-- ========== HULL: the area under a Gaussian curve ========== -->
+  <!-- The hull sits at the waterline. Its top edge is a bell curve. -->
+  <!-- quantile bands: outer (light blue P5-P95), mid (yellow), core (red P50 sliver) -->
   <defs>
-    <clipPath id="hullB">
-      <path d="M 86 498
-               C 118 498, 132 494, 146 470
-               C 168 432, 184 366, 210 348
-               C 230 334, 282 334, 302 348
-               C 328 366, 344 432, 366 470
-               C 380 494, 394 498, 426 498
+    <clipPath id="bellA">
+      <path d="M 96 476
+               C 132 476, 150 468, 168 430
+               C 190 384, 206 250, 256 250
+               C 306 250, 322 384, 344 430
+               C 362 468, 380 476, 416 476
                Z"/>
     </clipPath>
   </defs>
-  <g clip-path="url(#hullB)">
-    <!-- P5-P95 outer band -->
-    <rect x="80" y="330" width="352" height="172" fill="#cdd9fb"/>
-    <!-- P25-P75 inter-quartile band -->
-    <rect x="196" y="330" width="120" height="172" fill="#ffd02e"/>
-    <!-- P50 median sliver -->
-    <rect x="246" y="330" width="20" height="172" fill="#e0312e"/>
+
+  <!-- full bell fill (outer band) -->
+  <g clip-path="url(#bellA)">
+    <rect x="80" y="240" width="352" height="240" fill="#cdd9fb"/>
+    <!-- mid quantile band -->
+    <rect x="206" y="240" width="100" height="240" fill="#ffd02e"/>
+    <!-- core P50 band -->
+    <rect x="241" y="240" width="30" height="240" fill="#e0312e"/>
   </g>
   <!-- bell outline -->
-  <path d="M 86 498
-           C 118 498, 132 494, 146 470
-           C 168 432, 184 366, 210 348
-           C 230 334, 282 334, 302 348
-           C 328 366, 344 432, 366 470
-           C 380 494, 394 498, 426 498"
-        fill="none" stroke="#1a1a1a" stroke-width="7.5" stroke-linejoin="round" stroke-linecap="round"/>
-  <line x1="86" y1="498" x2="426" y2="498" stroke="#1a1a1a" stroke-width="7.5" stroke-linecap="round"/>
-  <!-- mu axis tick (mean) -->
-  <line x1="256" y1="498" x2="256" y2="346" stroke="#1a1a1a" stroke-width="3.5" stroke-dasharray="8 8" opacity="0.65"/>
-  <!-- box-plot foot: median notch caps on the baseline -->
-  <line x1="196" y1="498" x2="196" y2="486" stroke="#1a1a1a" stroke-width="4"/>
-  <line x1="316" y1="498" x2="316" y2="486" stroke="#1a1a1a" stroke-width="4"/>
+  <path d="M 96 476
+           C 132 476, 150 468, 168 430
+           C 190 384, 206 250, 256 250
+           C 306 250, 322 384, 344 430
+           C 362 468, 380 476, 416 476"
+        fill="none" stroke="#1a1a1a" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- hull baseline (waterline chord) -->
+  <line x1="96" y1="476" x2="416" y2="476" stroke="#1a1a1a" stroke-width="7" stroke-linecap="round"/>
+  <!-- mu tick: dashed center line marking the mean -->
+  <line x1="256" y1="476" x2="256" y2="262" stroke="#1a1a1a" stroke-width="3.5" stroke-dasharray="9 9" opacity="0.7"/>
 
-  <!-- =============== DECK PLATE: green bar where the tower meets the hull =============== -->
-  <!-- the buoy deck; reads as the platform the lattice stands on -->
-  <line x1="212" y1="338" x2="300" y2="338" stroke="#00a05a" stroke-width="11" stroke-linecap="round"/>
+  <!-- ========== DECK PLATE: green platform where the tower meets the hull ========== -->
+  <line x1="216" y1="256" x2="296" y2="256" stroke="#00a05a" stroke-width="11" stroke-linecap="round"/>
 
-  <!-- =============== MAST: lattice tower of integrals =============== -->
-  <!-- Two integral signs back-to-back form the tapering lattice legs; -->
-  <!-- rungs are short error bars; a summation crowns it. -->
+  <!-- ========== MAST: tapered lattice tower ========== -->
+  <!-- Two legs converge upward from the deck to the masthead. -->
+  <!-- left leg -->
+  <line x1="220" y1="256" x2="244" y2="142" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
+  <!-- right leg -->
+  <line x1="292" y1="256" x2="268" y2="142" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
+  <!-- middle ink rung at the sigma pinch, reading the tower as a true lattice -->
+  <line x1="237" y1="192" x2="279" y2="192" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
 
-  <!-- left integral leg -->
-  <path d="M 232 338
-           C 222 338, 220 330, 220 316
-           L 220 168
-           C 220 156, 218 150, 208 150"
-        fill="none" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
-  <!-- right integral leg (mirror) -->
-  <path d="M 280 338
-           C 290 338, 292 330, 292 316
-           L 292 168
-           C 292 156, 294 150, 304 150"
-        fill="none" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
+  <!-- ========== SIGMA BRACING: one sigma zigzag forms the diagonal bracing ========== -->
+  <!-- the sigma supplies the top + bottom crossmembers and the diagonal -->
+  <!-- bracing between them; its bars tuck just inside each leg -->
+  <path d="M 268 152
+           L 244 152
+           L 266 192
+           L 237 192
+           L 282 232
+           L 230 232"
+        fill="none" stroke="#e0312e" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- integral end-bulbs (the little serifs of the integral sign) -->
-  <circle cx="208" cy="150" r="6" fill="#1a1a1a"/>
-  <circle cx="304" cy="150" r="6" fill="#1a1a1a"/>
-  <circle cx="232" cy="338" r="6" fill="#1a1a1a"/>
-  <circle cx="280" cy="338" r="6" fill="#1a1a1a"/>
+  <!-- ========== MASTHEAD NECK + LIGHT ========== -->
+  <line x1="256" y1="142" x2="256" y2="116" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
+  <!-- short cross-spar (error bar) below the light -->
+  <line x1="224" y1="116" x2="288" y2="116" stroke="#00a05a" stroke-width="7" stroke-linecap="round"/>
+  <line x1="224" y1="108" x2="224" y2="124" stroke="#00a05a" stroke-width="7" stroke-linecap="round"/>
+  <line x1="288" y1="108" x2="288" y2="124" stroke="#00a05a" stroke-width="7" stroke-linecap="round"/>
+  <!-- neck from spar up to the light -->
+  <line x1="256" y1="116" x2="256" y2="100" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
 
-  <!-- lattice rungs / error-bar crossbars between the legs -->
-  <g stroke="#2456e6" stroke-width="6" stroke-linecap="round">
-    <line x1="221" y1="308" x2="291" y2="308"/>
-    <line x1="221" y1="272" x2="291" y2="272"/>
-    <line x1="221" y1="236" x2="291" y2="236"/>
-    <line x1="221" y1="200" x2="291" y2="200"/>
-  </g>
-  <!-- diagonal cross-braces (X lattice) -->
-  <g stroke="#1a1a1a" stroke-width="3.5" stroke-linecap="round" opacity="0.85">
-    <line x1="221" y1="308" x2="291" y2="272"/>
-    <line x1="291" y1="308" x2="221" y2="272"/>
-    <line x1="221" y1="272" x2="291" y2="236"/>
-    <line x1="291" y1="272" x2="221" y2="236"/>
-    <line x1="221" y1="236" x2="291" y2="200"/>
-    <line x1="291" y1="236" x2="221" y2="200"/>
-  </g>
-
-  <!-- =============== CROSS-SPAR: error bar with end caps =============== -->
-  <line x1="176" y1="150" x2="336" y2="150" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
-  <line x1="176" y1="136" x2="176" y2="164" stroke="#e0312e" stroke-width="8" stroke-linecap="round"/>
-  <line x1="336" y1="136" x2="336" y2="164" stroke="#e0312e" stroke-width="8" stroke-linecap="round"/>
-  <!-- small data dots on the spar tips -->
-  <circle cx="176" cy="150" r="9" fill="#ffd02e" stroke="#1a1a1a" stroke-width="4"/>
-  <circle cx="336" cy="150" r="9" fill="#ffd02e" stroke="#1a1a1a" stroke-width="4"/>
-
-  <!-- =============== TOWER NECK toward the light =============== -->
-  <line x1="256" y1="150" x2="256" y2="104" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
-
-  <!-- =============== LIGHT: x-hat point estimate + epsilon halo =============== -->
-  <!-- circumflex hat -->
-  <path d="M 230 78 L 256 50 L 282 78"
+  <!-- ========== LIGHT: point estimate dot with circumflex hat ========== -->
+  <!-- the x-hat: ^ over a solid dot -->
+  <path d="M 232 66 L 256 42 L 280 66"
         fill="none" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- the lantern glow: dashed circle (confidence ring) -->
-  <circle cx="256" cy="100" r="26" fill="none" stroke="#ffd02e" stroke-width="5" stroke-dasharray="6 8"/>
-  <!-- point estimate dot -->
-  <circle cx="256" cy="100" r="15" fill="#e0312e" stroke="#1a1a1a" stroke-width="5"/>
+  <circle cx="256" cy="88" r="15" fill="#e0312e" stroke="#1a1a1a" stroke-width="5"/>
 
-  <!-- =============== RESIDUAL SCATTER =============== -->
-  <circle cx="120" cy="404" r="7" fill="#00a05a"/>
-  <circle cx="402" cy="380" r="7" fill="#2456e6"/>
-  <circle cx="98"  cy="448" r="6" fill="#e0312e"/>
-  <circle cx="420" cy="436" r="6" fill="#ff5c8a"/>
-  <circle cx="148" cy="356" r="5" fill="#ffd02e" stroke="#1a1a1a" stroke-width="2"/>
-  <circle cx="372" cy="330" r="5" fill="#1a1a1a"/>
+  <!-- ========== residual scatter: a few dots around the buoy ========== -->
+  <circle cx="128" cy="300" r="7" fill="#00a05a"/>
+  <circle cx="392" cy="276" r="7" fill="#2456e6"/>
+  <circle cx="408" cy="350" r="6" fill="#e0312e"/>
+  <circle cx="108" cy="372" r="6" fill="#ffd02e" stroke="#1a1a1a" stroke-width="2"/>
 </svg>

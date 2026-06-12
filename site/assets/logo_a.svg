@@ -4,7 +4,7 @@
   <!-- ============================================================
        LOGO A  -  geometric / minimal
        hull  = filled Gaussian (normal distribution) area
-       mast  = capital Sigma standing upright
+       mast  = tapered lattice tower; the diagonal bracing is a sigma
        light = point estimate dot with circumflex (x-hat)
        water = single cosine waterline
        ============================================================ -->
@@ -63,31 +63,43 @@
   <!-- mu tick: dashed center line marking the mean -->
   <line x1="256" y1="476" x2="256" y2="262" stroke="#1a1a1a" stroke-width="3.5" stroke-dasharray="9 9" opacity="0.7"/>
 
-  <!-- ========== MAST: a capital Sigma standing upright ========== -->
-  <!-- The Sigma rises out of the bell peak as the buoy tower. -->
-  <g stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 300 250
-             L 212 250
-             L 256 188
-             L 212 126
-             L 300 126"
-          fill="none" stroke="#1a1a1a" stroke-width="13"/>
-  </g>
+  <!-- ========== DECK PLATE: green platform where the tower meets the hull ========== -->
+  <line x1="216" y1="256" x2="296" y2="256" stroke="#00a05a" stroke-width="11" stroke-linecap="round"/>
 
-  <!-- short neck from the Sigma top bar up to the spar -->
-  <line x1="256" y1="126" x2="256" y2="108" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
+  <!-- ========== MAST: tapered lattice tower ========== -->
+  <!-- Two legs converge upward from the deck to the masthead. -->
+  <!-- left leg -->
+  <line x1="220" y1="256" x2="244" y2="142" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
+  <!-- right leg -->
+  <line x1="292" y1="256" x2="268" y2="142" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
+  <!-- middle ink rung at the sigma pinch, reading the tower as a true lattice -->
+  <line x1="237" y1="192" x2="279" y2="192" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- ========== SIGMA BRACING: one sigma zigzag forms the diagonal bracing ========== -->
+  <!-- the sigma supplies the top + bottom crossmembers and the diagonal -->
+  <!-- bracing between them; its bars tuck just inside each leg -->
+  <path d="M 268 152
+           L 244 152
+           L 266 192
+           L 237 192
+           L 282 232
+           L 230 232"
+        fill="none" stroke="#e0312e" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- ========== MASTHEAD NECK + LIGHT ========== -->
+  <line x1="256" y1="142" x2="256" y2="116" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
   <!-- short cross-spar (error bar) below the light -->
-  <line x1="214" y1="108" x2="298" y2="108" stroke="#00a05a" stroke-width="7" stroke-linecap="round"/>
-  <line x1="214" y1="100" x2="214" y2="116" stroke="#00a05a" stroke-width="7" stroke-linecap="round"/>
-  <line x1="298" y1="100" x2="298" y2="116" stroke="#00a05a" stroke-width="7" stroke-linecap="round"/>
+  <line x1="224" y1="116" x2="288" y2="116" stroke="#00a05a" stroke-width="7" stroke-linecap="round"/>
+  <line x1="224" y1="108" x2="224" y2="124" stroke="#00a05a" stroke-width="7" stroke-linecap="round"/>
+  <line x1="288" y1="108" x2="288" y2="124" stroke="#00a05a" stroke-width="7" stroke-linecap="round"/>
   <!-- neck from spar up to the light -->
-  <line x1="256" y1="108" x2="256" y2="98" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
+  <line x1="256" y1="116" x2="256" y2="100" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/>
 
   <!-- ========== LIGHT: point estimate dot with circumflex hat ========== -->
   <!-- the x-hat: ^ over a solid dot -->
-  <path d="M 232 64 L 256 40 L 280 64"
+  <path d="M 232 66 L 256 42 L 280 66"
         fill="none" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="256" cy="86" r="15" fill="#e0312e" stroke="#1a1a1a" stroke-width="5"/>
+  <circle cx="256" cy="88" r="15" fill="#e0312e" stroke="#1a1a1a" stroke-width="5"/>
 
   <!-- ========== residual scatter: a few dots around the buoy ========== -->
   <circle cx="128" cy="300" r="7" fill="#00a05a"/>

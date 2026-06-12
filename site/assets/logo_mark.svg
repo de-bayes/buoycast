@@ -4,7 +4,7 @@
   <!-- ============================================================
        SIMPLIFIED MARK  -  survives at 24px
        hull  = filled Gaussian with quantile bands (blue / yellow / red)
-       mast  = stubby capital Sigma tower
+       mast  = stub tapered lattice; red sigma is the diagonal brace
        light = x-hat point-estimate dot
        water = one wave chord
        ============================================================ -->
@@ -34,13 +34,22 @@
         fill="none" stroke="#1a1a1a" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
   <line x1="78" y1="392" x2="434" y2="392" stroke="#1a1a1a" stroke-width="14" stroke-linecap="round"/>
 
-  <!-- MAST: a stubby capital Sigma -->
-  <path d="M 300 150 L 218 150 L 256 100 L 218 50 L 300 50"
-        fill="none" stroke="#1a1a1a" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- DECK PLATE: green platform joining tower to hull -->
+  <line x1="212" y1="150" x2="300" y2="150" stroke="#00a05a" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- MAST: stub tapered lattice (two converging legs) -->
+  <line x1="218" y1="150" x2="242" y2="76" stroke="#1a1a1a" stroke-width="15" stroke-linecap="round"/>
+  <line x1="294" y1="150" x2="270" y2="76" stroke="#1a1a1a" stroke-width="15" stroke-linecap="round"/>
+  <!-- SIGMA BRACING: one bold sigma zigzag is the diagonal brace -->
+  <path d="M 268 84 L 244 84 L 268 117 L 232 117 L 290 150 L 222 150"
+        fill="none" stroke="#e0312e" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- short neck to the light -->
+  <line x1="256" y1="76" x2="256" y2="56" stroke="#1a1a1a" stroke-width="13" stroke-linecap="round"/>
 
   <!-- LIGHT: x-hat dot on top -->
-  <path d="M 236 30 L 256 8 L 276 30"
-        fill="none" stroke="#1a1a1a" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 232 30 L 256 6 L 280 30"
+        fill="none" stroke="#1a1a1a" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="50" r="12" fill="#e0312e" stroke="#1a1a1a" stroke-width="6"/>
 
   <!-- one waterline wave under the hull -->
   <path d="M 56 430
