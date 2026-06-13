@@ -14,6 +14,7 @@ import pandas as pd
 import buoy
 import featuresq
 import fetch_weather
+import verify
 
 TAU = 8.0
 F = lambda c: c * 1.8 + 32
@@ -240,7 +241,18 @@ shutil.copy("models/qstats.json", "site/stats.json")
 
 with open("site/data.json", "w") as fh:
     json.dump(out, fh)
+
+# verification: log this forecast, then score the whole log against observation
+# for the Track Record page. The log is the real published numbers, so the
+# scorecard reflects genuine skill (weather-forecast error included).
+verify.append(t0, verify.fc_from_trajectory(trajectory), F(obs_now), out["generated_utc"])
+vj = verify.build(hourly_buoy["WTMP"], pd.Timestamp.now("UTC"), band_scale=round(float(scale), 2))
+with open("site/verify.json", "w") as fh:
+    json.dump(vj, fh)
+
 print(f"now {out['now']['wtmp_f']}F · +24h {trajectory[23]['p50']}F "
       f"[{trajectory[23]['p05']}-{trajectory[23]['p95']}] · "
       f"+168h {trajectory[167]['p50']}F [{trajectory[167]['p05']}-{trajectory[167]['p95']}]")
-print("wrote site/data.json, site/stats.json, copied figures")
+n24 = vj["headline"].get("n", 0) if vj.get("headline") else 0
+print(f"wrote site/data.json, site/stats.json, site/verify.json "
+      f"({vj['n_forecasts']} forecasts tracked, {n24} resolved at +24h)")

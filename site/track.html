@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track record | Buoycast</title>
+  <meta name="description" content="A live, honest scorecard: every water-temperature forecast Buoycast publishes is logged and scored against what the lake actually did. Skill over persistence, band coverage, and the full calibration, nothing cherry-picked.">
+  <meta property="og:title" content="Track record | Buoycast">
+  <meta property="og:description" content="Every forecast we publish is logged and scored against what the lake actually did. Nothing cherry-picked.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/assets/logo_mark.svg">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Track record | Buoycast">
+  <meta name="twitter:description" content="Every forecast we publish is logged and scored against what the lake actually did.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=15">
+  <link rel="icon" href="/assets/logo_mark.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body class="ms-page">
+  <header class="nav" id="nav">
+    <div class="nav__inner">
+      <a class="nav__brand" href="/">Buoycast</a>
+      <nav class="pill">
+        <a href="/">Forecast</a>
+        <a href="/ml">ML explainer</a>
+        <a href="/track" aria-current="page">Track record</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="ms-ruler" id="ms-ruler" aria-hidden="true">
+    <div class="ms-ruler__ticks" id="ms-ruler-ticks"></div>
+    <div class="ms-ruler__labels" id="ms-ruler-labels"></div>
+    <div class="ms-ruler__cursor" id="ms-ruler-cursor"><span class="ms-ruler__frac" id="ms-ruler-frac">0.00</span></div>
+  </div>
+
+  <main>
+    <div class="wrap">
+      <section class="hero reveal" id="sec-intro">
+        <header class="dash-head">
+          <p class="ms-crumb"><a href="/">Buoycast</a> <span>/</span> Track record</p>
+          <p class="ms-meta"><span id="tr-stamp">reading the log&hellip;</span> &middot; rolling 30 days</p>
+        </header>
+        <h1 class="dash-title">How the published forecasts actually did.</h1>
+        <p class="hero__lede">Every forecast we publish is logged the moment it ships and scored against what the lake actually did once each hour resolved. Nothing here is cherry-picked, and the numbers move with the weather: the log records the real published quantiles, so it captures weather-forecast error too, not just the model under perfect weather.</p>
+        <p class="caption" id="tr-intro-meta">&nbsp;</p>
+      </section>
+    </div>
+
+    <div class="wrap">
+      <section class="section section--first reveal" id="sec-headline">
+        <div class="section__head">
+          <span class="section__num">01</span>
+          <h2 class="section__title">The scorecard, at +24 hours</h2>
+        </div>
+        <div class="headline-row" id="tr-headline"></div>
+        <p class="caption" id="tr-headline-note">A day out is the headline lead: far enough that the weather has started to matter, near enough to verify quickly. Skill is measured against persistence, the naive forecast that assumes the water stays exactly where it is now.</p>
+      </section>
+
+      <section class="section reveal" id="sec-recent">
+        <div class="section__head">
+          <span class="section__num">02</span>
+          <h2 class="section__title">Recent +24h calls vs what happened</h2>
+        </div>
+        <figure class="ml-fig">
+          <div class="ml-fig__frame">
+            <p class="subhead">+24h forecast band and median against the observed water</p>
+            <canvas id="tr-recent" height="300"></canvas>
+          </div>
+          <figcaption class="ml-fig__cap"><span class="ms-cap"><span class="ms-cap__n">fig 1.</span> Each published +24h forecast: its 90 percent band (shaded), its median (blue line), and what the water actually read at that hour (dark line). <b>Live</b> points are forecasts we genuinely published; <b>hindcast</b> points (lighter, hollow) are a one-time reconstruction so the page is not empty on day one. As live forecasts accumulate they supersede the seed.</span></figcaption>
+        </figure>
+      </section>
+
+      <section class="section reveal" id="sec-lead">
+        <div class="section__head">
+          <span class="section__num">03</span>
+          <h2 class="section__title">Skill by lead time</h2>
+        </div>
+        <figure class="ml-fig">
+          <div class="ml-fig__frame">
+            <div class="duo">
+              <div><h3>Error vs persistence (&deg;F)</h3><canvas id="tr-skill" height="260"></canvas></div>
+              <div><h3>Observed 90% band coverage</h3><canvas id="tr-leadcov" height="260"></canvas></div>
+            </div>
+          </div>
+          <figcaption class="ml-fig__cap"><span class="ms-cap"><span class="ms-cap__n">fig 2.</span> Left: median forecast error (blue) against persistence (dashed) at each lead. The two are level inside a day, where the lake's thermal inertia leaves little to predict; the model pulls ahead from two days out as the coming weather starts to bite. Right: how often the 90 percent band actually contained the outcome at each lead, against the 90 percent target.</span></figcaption>
+        </figure>
+        <div class="tablewrap" style="margin-top:1.4rem"><table id="tr-table"></table></div>
+      </section>
+
+      <section class="section reveal" id="sec-calib">
+        <div class="section__head">
+          <span class="section__num">04</span>
+          <h2 class="section__title">Are the bands honest?</h2>
+        </div>
+        <figure class="ml-fig">
+          <div class="ml-fig__frame">
+            <p class="subhead">Claimed vs observed coverage, by lead</p>
+            <canvas id="tr-calib" height="280"></canvas>
+          </div>
+          <figcaption class="ml-fig__cap"><span class="ms-cap"><span class="ms-cap__n">fig 3.</span> A band that promises to catch 90 percent of outcomes should catch close to 90 percent in the field. Blue bars are the observed 90 percent coverage at each lead against the 90 percent target line; yellow bars the 50 percent band against its 50 percent line. Bars near or above the line are honest; bars below mean the band ran narrow.</span></figcaption>
+        </figure>
+        <p class="caption" id="tr-bandscale">&nbsp;</p>
+      </section>
+
+      <section class="section reveal" id="sec-empty" hidden>
+        <div class="section__head">
+          <span class="section__num">00</span>
+          <h2 class="section__title">Live tracking just started</h2>
+        </div>
+        <p class="hero__lede" id="tr-empty-msg">Live tracking just started &mdash; check back as forecasts resolve. The multi-season backtest below is already in hand.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div class="foot__inner">
+      <img class="foot__logo" src="/assets/logo.svg" alt="Buoycast: a buoy built from statistical symbols">
+      <p>Open data: NOAA NDBC, ERA5 (Copernicus), GFS/HRRR via Open-Meteo. The buoy is seasonal, roughly May to November. Not an official product; for safety decisions use NWS Chicago.<br><span class="foot__credit">Built by <a href="https://mccomb.ca">Ryan McComb</a></span></p>
+      <nav class="foot__nav">
+        <a href="/">Forecast</a>
+        <a href="/ml">ML explainer</a>
+        <a href="/track">Track record</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var nav = document.getElementById('nav');
+      function onScroll() { nav.classList.toggle('is-scrolled', window.scrollY > 8); }
+      onScroll();
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var items = document.querySelectorAll('.reveal');
+      if (reduce || !('IntersectionObserver' in window)) {
+        items.forEach(function (el) { el.classList.add('is-in'); });
+      } else {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+          });
+        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+        items.forEach(function (el) { io.observe(el); });
+      }
+    })();
+  </script>
+  <script>
+    window.MS_SECTIONS = [
+      ['sec-intro', 'INTRO'], ['sec-headline', 'SCORE'], ['sec-recent', 'RECENT'],
+      ['sec-lead', 'LEAD'], ['sec-calib', 'CALIB']
+    ];
+  </script>
+  <script src="/nav.js?v=1"></script>
+  <script src="/ruler.js?v=3"></script>
+  <script src="/track.js?v=1"></script>
+</body>
+</html>

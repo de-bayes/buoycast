@@ -2,11 +2,12 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/data.json", "destination": "https://34.172.202.78.sslip.io/data.json" },
-    { "source": "/stats.json", "destination": "https://34.172.202.78.sslip.io/stats.json" }
+    { "source": "/stats.json", "destination": "https://34.172.202.78.sslip.io/stats.json" },
+    { "source": "/verify.json", "destination": "https://34.172.202.78.sslip.io/verify.json" }
   ],
   "headers": [
     {
-      "source": "/(data|stats).json",
+      "source": "/(data|stats|verify).json",
       "headers": [{ "key": "Cache-Control", "value": "no-cache, max-age=60" }]
     }
   ]

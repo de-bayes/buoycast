@@ -11,7 +11,7 @@ buoycast.example.com {
 	encode gzip
 
 	# the forecast json must never be cached stale by browsers or proxies
-	@data path /data.json /stats.json
+	@data path /data.json /stats.json /verify.json
 	header @data Cache-Control "no-cache, max-age=60"
 	header @data Access-Control-Allow-Origin "*"
 
