@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 640" width="512" height="640" role="img" aria-label="SISH logo: a buoy built from statistical symbols">
-  <title>SISH</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 640" width="512" height="640" role="img" aria-label="Seiche logo: a buoy built from statistical symbols">
+  <title>Seiche</title>
 
   <!-- ============================================================
-       SISH LOGO  -  official mark
+       Seiche LOGO  -  official mark
        hull  = filled Gaussian (normal distribution) area
        mast  = tapered lattice tower; the diagonal bracing is a sigma
        light = point estimate dot with circumflex (x-hat)

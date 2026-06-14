@@ -1,4 +1,4 @@
-# Caddy config for SISH. Replace the domain with yours; Caddy provisions
+# Caddy config for Seiche. Replace the domain with yours; Caddy provisions
 # HTTPS automatically via Let's Encrypt once DNS points at the VM.
 #
 # Option A (everything on the VPS): this serves the whole site.
@@ -6,8 +6,8 @@
 # /data.json + /stats.json are read from here cross-origin; the CORS headers
 # below make that work. Set window.DATA_BASE in index.html to this origin.
 
-sish.example.com {
-	root * /opt/sish/site
+seiche.example.com {
+	root * /opt/seiche/site
 	encode gzip
 
 	# the forecast json must never be cached stale by browsers or proxies

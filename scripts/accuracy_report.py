@@ -1,5 +1,5 @@
 """Build reports/accuracy_report.pdf: a four-page plain-language accuracy
-report on the SISH forecaster, from the 131k out-of-sample pairs dumped
+report on the Seiche forecaster, from the 131k out-of-sample pairs dumped
 by report_pairs.py. Style matches the site: white, serif, one accent."""
 
 import pathlib
@@ -56,7 +56,7 @@ def page(pdf, title, kicker):
 
 
 def foot(fig, n):
-    fig.text(M, 0.03, "SISH accuracy report", fontsize=7, color=FAINT)
+    fig.text(M, 0.03, "Seiche accuracy report", fontsize=7, color=FAINT)
     fig.text(1 - M, 0.03, str(n), fontsize=7, color=FAINT, ha="right")
 
 
@@ -68,7 +68,7 @@ def by_h(frame, col="aerr", fn="mean"):
 pdf = PdfPages("reports/accuracy_report.pdf")
 
 # ---------------------------------------------------------------- page 1
-fig = page(pdf, "How accurate is the water forecast?", "SISH · accuracy report")
+fig = page(pdf, "How accurate is the water forecast?", "Seiche · accuracy report")
 gen = pd.Timestamp.now().strftime("%B %d, %Y")
 n_pairs = len(d)
 mae24 = d[d.h == 24].aerr.mean()
@@ -78,7 +78,7 @@ p168 = d[d.h == 168].aerr_p.mean()
 
 fig.text(M, 0.885, f"{gen} · Wilmette buoy 45174, Lake Michigan", fontsize=8.5, color=MUTED)
 abstract = (
-    "SISH forecasts the water temperature off the Evanston and Wilmette shoreline, "
+    "Seiche forecasts the water temperature off the Evanston and Wilmette shoreline, "
     "hour by hour, up to seven days ahead. This report measures how good those forecasts "
     "actually are. The test is strict: the model was retrained nine separate times, once "
     "for each season from 2018 to 2026, and each time it was scored only on weeks of data "
@@ -325,7 +325,7 @@ foot(fig, 4)
 pdf.savefig(fig); plt.close(fig)
 
 info = pdf.infodict()
-info["Title"] = "SISH accuracy report"
+info["Title"] = "Seiche accuracy report"
 info["Author"] = "Ryan McComb"
 pdf.close()
 print("wrote reports/accuracy_report.pdf")

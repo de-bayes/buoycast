@@ -1,4 +1,4 @@
-"""Build reports/sish_brief.pdf: the two-page plain-language brief for
+"""Build reports/seiche_brief.pdf: the two-page plain-language brief for
 sharing (Twitter -> PDF hosted on mccomb.ca). Numbers match the public
 explainer at mccomb.ca/ml (nine-season backtest means)."""
 
@@ -36,14 +36,14 @@ pairs = pd.read_csv("data/report_pairs.csv", parse_dates=["t"])
 pairs["aerr"] = (pairs.p50 - pairs.y).abs() * 1.8
 
 A4 = (8.27, 11.69); M = 0.085
-pdf = PdfPages("reports/sish_brief.pdf")
+pdf = PdfPages("reports/seiche_brief.pdf")
 
 # ---------------------------------------------------------------- page 1
 fig = plt.figure(figsize=A4)
 logo = np.array(Image.open("/tmp/logo_print.png"))
 ax_logo = fig.add_axes([1 - M - 0.095, 0.862, 0.095, 0.095 * (8.27/11.69) * (640/512) * 1.42])
 ax_logo.imshow(logo); ax_logo.axis("off")
-fig.text(M, 0.952, "SISH · A SHORT BRIEF", fontsize=7.5, color=ACCENT,
+fig.text(M, 0.952, "Seiche · A SHORT BRIEF", fontsize=7.5, color=ACCENT,
          weight="bold", family="serif")
 fig.text(M, 0.922, "A machine-learning forecast for\nLake Michigan water temperature", fontsize=18.5,
          weight="bold", va="top", linespacing=1.22)
@@ -57,7 +57,7 @@ body1 = (
     "temperature every ten minutes, May through November. Swimmers check it constantly, "
     "because this corner of Lake Michigan is moody: one hard north wind can tear the warm "
     "surface layer off the beach overnight and drop the water ten degrees while everyone sleeps.\n\n"
-    "SISH is my attempt to forecast that buoy. It is deliberately simple machinery: "
+    "Seiche is my attempt to forecast that buoy. It is deliberately simple machinery: "
     "gradient-boosted decision trees (scikit-learn, no neural networks), trained on ten seasons "
     "of history, 2016 through 2026. Each training example pairs one moment of the lake, described "
     "by 46 numbers (recent water temperatures, wind, sun, air temperature, the season clock, and "
@@ -88,7 +88,7 @@ fig.add_artist(plt.Line2D([M, 1-M], [stats_y - 0.048, stats_y - 0.048], color=RU
 ax = fig.add_axes([M, 0.135, 1 - 2 * M, 0.285])
 for f in bt["folds"]:
     ax.plot(HS, f["mae"], color=ACCENT, alpha=0.15, lw=0.8)
-ax.plot(HS, mae, color=ACCENT, lw=2.4, marker="o", ms=3.5, label="SISH")
+ax.plot(HS, mae, color=ACCENT, lw=2.4, marker="o", ms=3.5, label="Seiche")
 ax.plot(HS, maep, color=MUTED, lw=1.8, ls="--", label='"the water stays the same" (persistence)')
 ax.set_xticks([1, 24, 48, 72, 96, 120, 144, 168])
 ax.set_xlabel("forecast lead (hours ahead)")
@@ -101,7 +101,7 @@ fig.text(M, 0.072,
          "individual seasons. At one day the lake barely moves, so beating persistence is nearly impossible; "
          "from two days out the model pulls away, and at a week it is roughly twice as accurate.",
          fontsize=7.8, color=MUTED, va="top", linespacing=1.5, wrap=True)
-fig.text(M, 0.028, "SISH brief · page 1 of 2", fontsize=7, color=FAINT)
+fig.text(M, 0.028, "Seiche brief · page 1 of 2", fontsize=7, color=FAINT)
 pdf.savefig(fig); plt.close(fig)
 
 # ---------------------------------------------------------------- page 2
@@ -170,11 +170,11 @@ fig.text(M, 0.103,
     "calibration on pooled out-of-sample residuals; anchor-blended to the live observation.",
     fontsize=8.6, color=MUTED, va="top", linespacing=1.55, wrap=True)
 fig.text(M, 0.045, "Ryan McComb · mccomb.ca · June 2026", fontsize=8, color=MUTED)
-fig.text(1 - M, 0.045, "SISH brief · page 2 of 2", fontsize=7, color=FAINT, ha="right")
+fig.text(1 - M, 0.045, "Seiche brief · page 2 of 2", fontsize=7, color=FAINT, ha="right")
 pdf.savefig(fig); plt.close(fig)
 
 info = pdf.infodict()
-info["Title"] = "SISH: a machine-learning forecast for Lake Michigan water temperature"
+info["Title"] = "Seiche: a machine-learning forecast for Lake Michigan water temperature"
 info["Author"] = "Ryan McComb"
 pdf.close()
-print("wrote reports/sish_brief.pdf")
+print("wrote reports/seiche_brief.pdf")

@@ -98,6 +98,6 @@ ax.legend(frameon=False, labelcolor=INK, fontsize=9)
 ax.grid(alpha=0.15)
 ax.tick_params(colors=INK)
 
-fig.suptitle("SISH driver study · Wilmette buoy 45174 + ERA5 reanalysis, 2021-2026", color="w", x=0.19, ha="left", fontsize=13)
+fig.suptitle("Seiche driver study · Wilmette buoy 45174 + ERA5 reanalysis, 2021-2026", color="w", x=0.19, ha="left", fontsize=13)
 fig.savefig("reports/correlations.png", dpi=150, facecolor=BG)
 print("wrote reports/correlations.png")

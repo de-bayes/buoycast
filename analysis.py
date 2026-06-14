@@ -132,7 +132,7 @@ ax.set_ylabel("water temp (F)", color=C["ink"])
 ax.set_title("Test weeks, hour by hour: where the +12h forecast missed", color="w", loc="left")
 ax.legend(frameon=False, labelcolor=C["ink"], fontsize=9, ncols=3)
 
-fig.suptitle("SISH error analysis · Wilmette buoy 45174 · held-out test weeks", color="w", fontsize=13, x=0.07, ha="left")
+fig.suptitle("Seiche error analysis · Wilmette buoy 45174 · held-out test weeks", color="w", fontsize=13, x=0.07, ha="left")
 fig.savefig("reports/error_analysis.png", dpi=150, facecolor=C["bg"])
 print("wrote reports/error_analysis.png")
 

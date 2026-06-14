@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How the model works | SISH</title>
-  <meta name="description" content="A plain-language, animated explainer of how SISH forecasts Lake Michigan water temperature: gradient boosting, quantile bands, anchoring, and a four-model weather ensemble.">
-  <meta property="og:title" content="How the model works | SISH">
-  <meta property="og:description" content="A plain-language explainer of how SISH forecasts Lake Michigan water temperature.">
+  <title>How the model works | Seiche</title>
+  <meta name="description" content="A plain-language, animated explainer of how Seiche forecasts Lake Michigan water temperature: gradient boosting, quantile bands, anchoring, and a four-model weather ensemble.">
+  <meta property="og:title" content="How the model works | Seiche">
+  <meta property="og:description" content="A plain-language explainer of how Seiche forecasts Lake Michigan water temperature.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="/assets/logo_mark.svg">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="How the model works | SISH">
-  <meta name="twitter:description" content="A plain-language explainer of how SISH forecasts Lake Michigan water temperature.">
+  <meta name="twitter:title" content="How the model works | Seiche">
+  <meta name="twitter:description" content="A plain-language explainer of how Seiche forecasts Lake Michigan water temperature.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@
 <body class="ms-page">
   <header class="nav" id="nav">
     <div class="nav__inner">
-      <a class="nav__brand" href="/">SISH</a>
+      <a class="nav__brand" href="/">Seiche</a>
       <nav class="pill">
         <a href="/">Forecast</a>
         <a href="/ml" aria-current="page">ML explainer</a>
@@ -43,7 +43,7 @@
     <div class="wrap">
       <article class="ms-article">
         <header class="ms-masthead reveal">
-          <p class="ms-crumb"><a href="/">SISH</a> <span>/</span> How the model works</p>
+          <p class="ms-crumb"><a href="/">Seiche</a> <span>/</span> How the model works</p>
           <p class="ms-meta">1823 words &middot; Ryan McComb</p>
           <h1 class="ms-title">How a computer learns the lake.</h1>
           <p class="ms-sub">Exploiting ten years of buoy readings to forecast the water, without ever pretending to be sure.</p>
@@ -190,7 +190,7 @@
             <p class="ms-kicker"><span class="ms-kicker__num">11</span> Memorizing is not learning</p>
             <h2>A perfect score on the past can be worthless</h2>
             <p>Any model can look flawless on history by simply <b>memorizing</b> it, noise and all. The wiggly curve below threads exactly through every observation it was shown, hitting each one dead on, and for a moment it appears perfect. Then new readings arrive that it never saw, and it lurches wildly between them, because it learned the dots rather than the shape behind them.</p>
-            <p>The smooth curve does the opposite. It accepts small errors on the past in exchange for staying close to the truth on data it has not seen. Everything about how SISH is trained and tested, the held-out window, the gap, the nine replayed seasons, exists to catch memorization before it can masquerade as skill.</p>
+            <p>The smooth curve does the opposite. It accepts small errors on the past in exchange for staying close to the truth on data it has not seen. Everything about how Seiche is trained and tested, the held-out window, the gap, the nine replayed seasons, exists to catch memorization before it can masquerade as skill.</p>
           </div>
           <figure class="ml-fig">
             <div class="ml-fig__frame"><canvas id="a-overfit" height="240"></canvas></div>
@@ -202,7 +202,7 @@
           <div class="ms-section__text">
             <p class="ms-kicker"><span class="ms-kicker__num">12</span> The proof</p>
             <h2>Tested on seasons it never saw</h2>
-            <p>It is easy to fit the past. The honest test is to <b>train on the past and predict a stretch the model has never seen</b>, then score it. SISH replays nine past seasons this way, 131,000 forecast-and-check pairs, always with a gap so no answer leaks into training.</p>
+            <p>It is easy to fit the past. The honest test is to <b>train on the past and predict a stretch the model has never seen</b>, then score it. Seiche replays nine past seasons this way, 131,000 forecast-and-check pairs, always with a gap so no answer leaks into training.</p>
             <p>It beats the naive &ldquo;tomorrow equals today&rdquo; baseline from about a day and a half out, and by day seven it is more than twice as accurate.</p>
           </div>
           <figure class="ml-fig">
@@ -264,7 +264,7 @@
 
   <footer class="foot">
     <div class="foot__inner">
-      <img class="foot__logo" src="/assets/logo.svg" alt="SISH: a buoy built from statistical symbols">
+      <img class="foot__logo" src="/assets/logo.svg" alt="Seiche: a buoy built from statistical symbols">
       <p>Open data: NOAA NDBC, ERA5 (Copernicus), GFS / ECMWF / ICON / GEM via Open-Meteo. The animations above are illustrations of the methods, not the live model.</p>
       <nav class="foot__nav">
         <a href="/">Forecast</a>

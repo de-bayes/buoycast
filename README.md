@@ -1,6 +1,6 @@
-# SISH
+# Seiche
 
-*Seasonal Ensemble for In-Lake Conditions and Hourly Estimates. Named for the seiche, the slow standing wave that sloshes back and forth across a lake.*
+*Named for the seiche, the slow standing wave that sloshes back and forth across a lake when wind or pressure sets the water rocking.*
 
 Probabilistic water temperature forecasts for the Evanston-Wilmette lakefront: an hourly P5/P25/P50/P75/P95 trajectory out to 168 hours, built on the Wilmette buoy (NDBC 45174), ERA5 reanalysis, and the GFS/HRRR forecast. One target, measured hard. Ships with a dashboard in `site/` (plain static, Vercel-ready).
 
@@ -25,11 +25,11 @@ python3 publish.py         # live forecast -> site/data.json + site/stats.json
 
 Three launchd agents (in `~/Library/LaunchAgents`, scripts in `scripts/`):
 
-- `com.sish.serve`: keeps the dashboard at http://127.0.0.1:4175/
-- `com.sish.refresh`: hourly `publish.py` (fresh buoy obs + weather forecast, ~30 s, two API calls)
-- `com.sish.retrain`: Sunday 05:30 full refetch and `train_q.py --refit-full` (~30 min)
+- `com.seiche.serve`: keeps the dashboard at http://127.0.0.1:4175/
+- `com.seiche.refresh`: hourly `publish.py` (fresh buoy obs + weather forecast, ~30 s, two API calls)
+- `com.seiche.retrain`: Sunday 05:30 full refetch and `train_q.py --refit-full` (~30 min)
 
-Logs land in `~/Library/Logs/sish/`. The hourly cost is two keyless API requests, so this is sustainable indefinitely; the weekly retrain keeps the model current with the season.
+Logs land in `~/Library/Logs/seiche/`. The hourly cost is two keyless API requests, so this is sustainable indefinitely; the weekly retrain keeps the model current with the season.
 
 ## Headline results (held-out test, deg F MAE)
 

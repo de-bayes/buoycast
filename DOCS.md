@@ -1,4 +1,4 @@
-# SISH engineering notes
+# Seiche engineering notes
 
 Running log of non-obvious decisions and the bugs behind them. Newest first.
 

@@ -1,12 +1,12 @@
 [Unit]
-Description=SISH hourly forecast publish
+Description=Seiche hourly forecast publish
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=oneshot
 User=buoycast
-WorkingDirectory=/opt/sish
-ExecStart=/opt/sish/venv/bin/python publish.py
+WorkingDirectory=/opt/seiche
+ExecStart=/opt/seiche/venv/bin/python publish.py
 TimeoutStartSec=900
 Nice=10
