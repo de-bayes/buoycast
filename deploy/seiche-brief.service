@@ -7,6 +7,7 @@ Wants=network-online.target
 Type=oneshot
 User=buoycast
 WorkingDirectory=/opt/seiche
+Environment=HOME=/opt/seiche
 ExecStart=/opt/seiche/venv/bin/python brief.py
 TimeoutStartSec=300
 Nice=15

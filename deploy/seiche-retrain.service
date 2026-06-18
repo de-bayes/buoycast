@@ -7,6 +7,11 @@ Wants=network-online.target
 Type=oneshot
 User=buoycast
 WorkingDirectory=/opt/seiche
+# HOME must point at a real, writable dir (the original /opt/buoycast home was
+# deleted in the 2026-06-13 rename) or matplotlib/config writes fail.
+Environment=HOME=/opt/seiche
 ExecStart=/bin/bash -c 'set -e; V=/opt/seiche/venv/bin/python; $V fetch.py; $V fetch_weather.py; $V fetch_mursst.py update || true; $V fetch_lmhofs.py update || true; $V train_q.py --refit-full; $V backtest.py; $V corr.py; $V publish.py'
-TimeoutStartSec=7200
+# the streamed retrain (55 feats + streams + backtest) ran ~1h42m and hit the old
+# 2h cap on the e2-micro; 4h gives headroom.
+TimeoutStartSec=14400
 Nice=15
