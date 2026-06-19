@@ -2,6 +2,40 @@
 
 Running log of non-obvious decisions and the bugs behind them. Newest first.
 
+## 2026-06-19 — Retrain moved to the Mac (the micro is too slow), ships to VM
+
+**Symptom.** The weekly VM retrain (`seiche-retrain.timer`) timed out twice: at
+the old 2h cap, then again at a raised 4h cap (consuming 2h18m CPU at ~58% duty
+on the throttled shared core, killed in the tail). The models *did* refresh
+mid-run each time, but the chain never completed, risking half-updated state.
+
+**Root cause.** The e2-micro is ~25x too slow for the streamed retrain. The
+55-feature + subsurface-stream feature matrix over ~600k rows is rebuilt
+independently by `train_q`, `backtest`, and `corr`; the journal showed a ~2h11m
+gap from the stream fetch (17:48) to train_q's "stacked rows" (19:59) — feature
+building alone, three times over, exceeds any sane timeout. More timeout cannot
+fix a machine that slow; the honest fix is to retrain somewhere capable.
+
+**Fix — Mac retrains, ships to the VM.** `scripts/retrain.sh` now runs the full
+streamed chain on the Mac (~15 min: fetch + fetch_weather + stream updates +
+`train_q --refit-full` + `backtest` + `corr`), then `gcloud compute scp`s the
+artifacts the VM's `publish.py` reads — `q_*.joblib`, `qstats.json`,
+`backtest.json`, `reports/correlations.json` — to a `/tmp` stage on the VM,
+`install`s them as `buoycast:buoycast`, and triggers `seiche-publish.service`.
+Mac and VM run identical libs (sklearn 1.8.0 / joblib 1.5.3 / numpy 2.4) so the
+pickles load cleanly. Scheduled by the existing Mac launchd agent
+`com.seiche.retrain` (Sun 05:30). The VM's `seiche-retrain.timer` is disabled.
+
+**Invariant.** Serving/publishing stays always-on on the VM and never depends on
+the Mac — `seiche-publish.timer` keeps shipping `data.json` every 10 min from
+whatever models are installed. Only the *weekly model refresh* depends on the
+Mac being awake roughly weekly; a missed week is harmless (the seasonal model is
+stable week-to-week). The ship step must preserve `buoycast` ownership of
+`/opt/seiche/models` (publish runs as that user) and must NOT overwrite the VM's
+live-fetched stream CSVs (`data/mursst.csv`, `data/lmhofs.csv`) — publish
+refreshes those itself, staleness-gated, and the Mac-trained model reads the
+VM's live streams at inference.
+
 ## 2026-06-14 — Decision layer: swim, thresholds, alerts, beach
 
 Turned the calibrated distribution into decisions (`decide.py` + `beach.py`,
