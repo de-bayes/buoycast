@@ -129,6 +129,9 @@ if len(rb) >= 6:
     e = np.abs(anch24 - actual)
     e = e[np.isfinite(e)]
     recenterr = float(np.mean(e)) if e.size else None
+    se = anch24 - actual                            # SIGNED: + means the model ran warm
+    se = se[np.isfinite(se)]
+    recentbias = float(np.mean(se)) if se.size else None
 
 # bands = model residual (+) weather-model spread, combined in quadrature. The
 # residual half-width is the backtest's normalized-conformal quantile per
@@ -150,6 +153,23 @@ if bt_calib_path.exists():
     elif bt.get("calib"):
         calib = bt["calib"]
         print(f"static backtest calibration ({len(calib)} horizons); no adaptive scale")
+# live bias correction on the CENTER. A sustained one-sided miss -- the model
+# running warm in a cold-lake regime (upwelling), or cold in a warm one -- shows
+# up as a trailing signed +24h error that no retrain fixes (it is structural /
+# weather-driven, not a stale model). Subtract a damped fraction of it from the
+# median, ramped in by the same anchor decay so short leads stay pinned to the
+# measured current temperature. The bands ride along with the shifted center.
+# alpha and the clip are deliberately conservative: the 9-season backtest
+# (scripts/bias_correction_test.py) showed alpha~0.5 cuts sustained-regime +24h
+# MAE ~35% (the 2019 fold 1.95 -> 1.29F) for a <=0.07F cost in calm seasons.
+BIAS_ALPHA, BIAS_CLIP_C = 0.5, 1.5
+bias_corr = np.zeros_like(p50)
+if recentbias is not None:
+    bias_corr = np.clip(BIAS_ALPHA * recentbias * (1.0 - decay), -BIAS_CLIP_C, BIAS_CLIP_C)
+    p50 = p50 - bias_corr
+    print(f"bias correction (alpha {BIAS_ALPHA}): recent +24h bias {recentbias * 1.8:+.2f}F "
+          f"-> center shift {-bias_corr[23] * 1.8:+.2f}F at +24h, {-bias_corr[-1] * 1.8:+.2f}F at +168h")
+
 ch = np.array(sorted(int(k) for k in calib))
 getc = lambda key: np.interp(hs, ch, [calib[str(k)][key] for k in ch])
 # per-member anchoring already pins sigma to ~0 at h=1 and lets it grow with
@@ -241,6 +261,7 @@ out = {
     "members": members_out,
     "uncertainty": unc,
     "band_scale": round(float(scale), 2),
+    "bias_shift_f": round(float(-bias_corr[23] * 1.8), 2),   # +24h center shift applied (deg F)
 }
 
 # decisions from the calibrated distribution: swim guidance, threshold-exceedance

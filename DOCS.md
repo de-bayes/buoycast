@@ -2,6 +2,53 @@
 
 Running log of non-obvious decisions and the bugs behind them. Newest first.
 
+## 2026-06-23 — Live bias correction on the forecast center
+
+**Symptom.** The live 30-day track record degraded badly during a sustained
+cold-lake stretch: +24h MAE 2.72F (worse than persistence's 1.54F), cover90
+collapsed to 0.63, and a one-sided warm bias of +2 to +3F at every lead. The
+model kept calling ~64F while the buoy sat at ~59F. A retrain did NOT fix it
+(Sunday's refit on fresh data left the bias intact): it is structural, not a
+stale model. The perfect-prog model maps weather to water, and in an upwelling
+regime the surface is colder than the weather implies; even the LMHOFS physics
+stream read ~67F vs the buoy's 59F, so it reinforced the warm call.
+
+**Why the obvious fixes don't apply.** A retrain relearns the same warm mapping.
+The reactive trend-nudge was already tested and rejected (2026-06-14) for a
+different reason (the model already reacts to live *trends*); this is a
+persistent *level* offset, not a trend. Symmetric band-widening (the adaptive
+scale, already maxed at 2.5) can't fix a one-sided miss: the actuals all land on
+the cold side of a too-warm median.
+
+**Fix — damped trailing-bias correction (`publish.py`).** Track the trailing-48h
+mean SIGNED +24h error (the same causal construction the band width uses, but
+keeping the sign), and subtract a damped fraction from the median:
+`corr(h) = clip(ALPHA * recent_bias * (1 - anchor_decay(h)), +/-1.5C)`, ALPHA
+0.5. The `(1 - decay)` ramp keeps short leads pinned to the measured current
+temperature (the anchor already makes +1h ~unbiased) and grows the correction in
+as the anchor fades; the bands ride along with the shifted center. Exposed as
+`data.json.bias_shift_f` (the +24h shift in F). This is a publish-time change
+only -- no retrain, no model change.
+
+**Validation** (`scripts/bias_correction_test.py`, pre-registered, 9 folds). The
+backtest is perfect-prog (reanalysis weather), so it UNDERSTATES the live benefit
+(it lacks the weather-driven warm bias) but tests the mechanism honestly: ALPHA
+0.5 cuts pooled +24h |bias| 0.34 -> 0.16F and pooled MAE 0.93 -> 0.82F, with the
+sustained-miss 2019 fold improving most (MAE 1.95 -> 1.29F, bias -1.49 ->
+-0.77F). Cost in calm folds is small (2022 better, 2025 flat, 2023 +0.07F at
+ALPHA 0.5 -- it ticks just over the pre-registered 0.05F guard, accepted as a
+monitored tradeoff given the live regime is far more severe than any calm fold).
+Live now: recent +24h bias +2.11F -> center cooled 1.00F at +24h.
+
+**Invariant.** The correction must stay graceful and bounded: no recent resolved
++24h forecasts -> `recentbias` is None -> zero shift (forecast unchanged); the
+shift is clipped to +/-1.5C so a pathological signal can't run the forecast away;
+and it is zero at +1h (anchored to observation) by the `(1 - decay)` ramp. The
+forecast log records the corrected (published) numbers, so the Track Record
+scores what users actually saw and ALPHA can be retuned from live evidence. The
+backtest calib is NOT yet re-derived on corrected residuals (a known
+simplification); the adaptive band scale self-tightens as the logged error falls.
+
 ## 2026-06-19 — Retrain moved to the Mac (the micro is too slow), ships to VM
 
 **Symptom.** The weekly VM retrain (`seiche-retrain.timer`) timed out twice: at
